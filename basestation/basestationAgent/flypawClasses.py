@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import copy
 from pickle import FALSE
 from queue import Empty
 from geographiclib.geodesic import Geodesic
@@ -167,6 +168,28 @@ class Task(object):
         self.comms_required = False
         self.dynamicTask = False
         self.uniqueID = uid
+        self.LocationLocked = False
+        self.ConnectionConfirmed = False
+
+    def Actionable(self):#Stub, needs to be implemented--dictates whether a task can be completed under the current circumstances
+        x=0
+
+    def ChangePosition(self,pos:Position):
+        if(not self.LocationLocked):
+            self.position = pos
+            return True
+        else:
+            return False
+
+
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
 
 
 #Ensures IDs for tasks are unique and assigned by a third party....maybe I should've just built it into TaskQ, something like, NewEmptyTask()
@@ -178,6 +201,27 @@ class TaskIDGenerator(object):
         id = self.CurrentTaskID
         self.CurrentTaskID = self.CurrentTaskID + 1
         return id
+
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
+class IDGenerator(object):
+    def __init__(self):
+        self.CurrentID= 0
+
+    def Get(self):
+        id = self.CurrentID
+        self.CurrentID = self.CurrentID + 1
+        return id
+
+    def Check(self):
+        return self
     
 
 class TaskQueue(object):
@@ -185,6 +229,7 @@ class TaskQueue(object):
     def __init__(self):
         self.queue = []
         self.Count = 0
+        self.TaskLock = TaskHold()
     def PushTask(self, task:Task):
         self.queue.insert(0,task)
         self.Count =  self.Count + 1
@@ -231,6 +276,12 @@ class TaskQueue(object):
         elif(self.Count>0): 
             return False
 
+    def Peek(self):
+        if(not self._empty()):
+            return self.queue(self.Count)
+        else:
+            return None
+
     def NextTask(self):
         if not self.Empty():
             return self.queue[self.Count-1]
@@ -239,6 +290,23 @@ class TaskQueue(object):
     def AppendTask(self,task):
         self.queue.append(task)
         self.Count =  self.Count + 1
+
+    def HoldTopTask(self):
+        self.TaskLock.HoldTask(self.PopTask())
+
+
+    def Release(self):
+        return self.TaskLock.ReleaseTask()
+
+
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
 
 class WaypointHistory(object):
     def __init__(self):
@@ -252,11 +320,21 @@ class WaypointHistory(object):
         else:
             return 0
 
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
     def AddPoint(self,Waypoint,Connected):#compresses into tuple
         self.WaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
         self.TrueWaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
         self.Count = self.Count + 1
         self.TrueCount = self.TrueCount+1
+
     def StackPop(self):#return tuple
         if(not self._empty()):
             self.Count = self.Count - 1
@@ -331,13 +409,15 @@ class WaypointHistory(object):
 
 
 class RadioMap(object):
-    def __init__(self):
+    def __init__(self,RadioPosition):
         self.lats = []
         self.lons = []
         self.headings = []
         self.dataRate = []
         self.length = 0
         self.positions =[]
+        self.maxDistance = 0
+        self.radioPosition = RadioPosition
     def Add(self, lat, lon, heading, rate,alt):
         self.lats.append(lat)
         self.lons.append(lon)
@@ -347,6 +427,37 @@ class RadioMap(object):
         pos = Position()
         pos.InitParams(lon,lat,alt,0,0,0)
         self.positions.append(pos)
+
+        if(rate>0):
+            x =0
+            geo = Geodesic.WGS84.Inverse(pos.lat, pos.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+            distance_to_radio = geo.get('s12')
+            if distance_to_radio>self.maxDistance:
+                self.maxDistance = distance_to_radio
+            #print("The distance to radio is {:.3f} m.".format(geo['s12']))
+
+
+
+
+    def ConnectionProbabilty(self,currentPosition):
+        rMax = self.maxDistance
+        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+        d = geo.get('s12')
+        if(d<1.05*rMax):
+            return 0.95
+        elif(d<1.1*rMax):
+            return 0.75
+        elif(d<1.2*rMax):
+            return 0.50
+        elif(d<1.3*rMax):
+            return 0.30
+        elif(d<1.4*rMax):
+            return 0.15
+        elif(d<1.5*rMax):
+            return 0.03
+        else:
+            return 0.01
+
 
 
     def FindClosestPointWithConnection(self,nextPoint,currentPosition,radioPosition):
@@ -368,4 +479,243 @@ class RadioMap(object):
         return suggestedPositon
 
 
+class Node(object):#Interdependent PredictiveTree Class, can exist without one, but its hopelessly lost  :(
+    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator):
+        self.Q = q.__deepcopy__()
+        self.ID = ID_num #identifies node
+        self.Parent = -1 #  -1 represents orphan status
+        self.Children = []
+        self.Finish = finish
+        self.LeadingTask = task
+        self.TravelHistory = waypointHistory.__deepcopy__()
+        self.ID_GEN = id_gen.__deepcopy__()
+        self.Connected = connected
+
+
+
+
         
+    def Accept(self,parent):#child node recognizes and catalogs parent
+        self.Parent = parent.ID
+        if(self.ID ==-1):
+            x=0
+            #children can't be adopted twice, throw an exception or warning or something
+
+
+    def Adopt(self,child):
+        self.Children.append(child.ID)
+        child.accept(self)
+
+class TreeStatusHolder(object):
+    def __init__(self):
+        self.Postion = -1
+        self.Connected = -1
+    
+    def Update(self,position:Position,connected:bool):
+        self.Postion = position
+        self.Connected = connected
+
+    def Reset(self):
+        self.Postion = -1
+        self.Postion = -1
+
+class TaskHold(object):
+    def __init__(self):
+        self.Captives = list
+        self.Reasons = list
+
+    def HoldTask(self, t:Task):
+        self.Captives.append(t)
+        self.Reasons.append("CONNECTION")
+
+    def ReleaseTask(self):
+        self.Reasons.pop()
+        return self.Captives.pop()
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
+
+
+
+
+# class StateContainer(object):
+#     def __init__(self,tasks:TaskQueue,history:WaypointHistory,id_gen:TaskIDGenerator):
+#         self.CurrentQueue = tasks.__deepcopy__()
+#         self.TravelHistory = history.__deepcopy__()
+#         self.ID_GEN = id_gen.__deepcopy__()
+
+class PredictiveTree(object):
+    def __init__(self,root:Node):
+        self.Nodes = []
+        self.Root = root
+        self.ID_Gen = IDGenerator()
+        self.TasksHeld = TaskHold()
+        self.maxDistance = 150 #this should be passed in eventually i.e. Dynamic
+        self.Status = TreeStatusHolder()
+        
+
+        
+
+    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory):#deines a new node and adds it to the list of nodes
+        id  =  self.ID_Gen.Get()
+        waypointHistory:WaypointHistory = prevWaypointHistory.__deepcopy__()
+        if(t.task=="FLIGHT"):
+            waypointHistory.AddPoint(t.position,connected)
+        newNode = Node(id,taskQ,t,finish,connected,waypointHistory)
+        self.Nodes.append(newNode)
+        return newNode
+
+    def ConnectionProbabilty(self,currentPosition):
+        rMax = self.maxDistance
+        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+        d = geo.get('s12')
+        if(d<1.05*rMax):
+            return 0.95
+        elif(d<1.1*rMax):
+            return 0.75
+        elif(d<1.2*rMax):
+            return 0.50
+        elif(d<1.3*rMax):
+            return 0.30
+        elif(d<1.4*rMax):
+            return 0.15
+        elif(d<1.5*rMax):
+            return 0.03
+        else:
+            return 0.01
+
+    def PrintTree():#stub for now
+        x=0
+    def AnalyzeOptions():#stub for now
+        x=0
+    def Root(self,n:Node):#returns the root of a given node
+        if(n.Parent == -1):
+            return n
+        else:
+            return self.Root(self.Nodes[self.Parent])
+
+
+    def BackStep(self,node:Node):
+        Q = node.Q.__deepcopy__()
+        wph:WaypointHistory = node.TravelHistory().__deepcopy__()
+
+        
+        # Update Q here to return to connection complete task, then return on same path
+        # we should return a new node here
+        
+
+        backSteps = wph.BackTrackPathForConnectivity()
+        taskConversion = []
+        nextTask = Q.NextTask()
+        backSteps.reverse()
+        insertPostion = 0
+        for idx, waypoint in enumerate(backSteps):
+ 
+            if(waypoint[1]):
+                print("Appending Next Task!")
+                taskConversion.append(nextTask)
+            t = Task(waypoint[0],"FLIGHT",0,0,self.TaskIDGen.Get())
+            t.dynamicTask = True
+            print("TASK ID: "+str(waypoint[2])) 
+            taskConversion.append(t)
+        
+
+        BackTrackTaskList = taskConversion
+        ForwardSteps = self.FindFowardConnection()
+        taskConversion = []
+        #for now, lets just return a list of two tasks sets, but this should be an object in the future
+        taskConversion.append(BackTrackTaskList)
+        if(len(ForwardSteps)):
+            taskConversion.append(ForwardSteps)
+
+        t = self.taskQ.PopTask()
+        self.taskQ.AppendTasks(taskConversion)
+
+
+        n = self.NewNode(Q,t,False,False,wph)
+        return n
+        
+
+
+    def CheckHold(self,Q:TaskQueue):
+        if(self.Status.Connected):
+            while(not Q.TaskHold.Captives):
+                t_ref:Task = Q.Release()
+
+
+    def ActionableTask(self,t:Task,connected):#maybe this can be expanded to check battery etc.
+        if(t.task == "SEND_DATA"):
+            return connected #this means if we have a send task, its actionable if we have a connection
+        else:
+            return True
+
+
+    def ConnectionThreshold(self,position,threshold):
+        probabilty = self.ConnectionProbabilty(position)
+        if(probabilty>threshold):
+            return True
+        else:
+            return False
+    
+
+    def Continue(self,nextNode:Node):
+        Q = nextNode.Q.__deepcopy__()
+        currentNode:Node = nextNode
+        self.Status.Update(currentNode.LeadingTask.position,currentNode.Connected)
+        
+
+
+        while(not Q.Empty):
+            self.CheckHold(Q)
+            t:Task = Q.pop()
+
+            if(self.ActionableTask(t,self.Status.Connected)):#for now let's only continue that have success of >80%, others halt.Hypothetically, we could adopt both a failure and success node for each continue...this would be ideal...
+                nextLocationConnected = self.ConnectionThreshold(t.position,0.80) #for now, were only persuing options with a greater than 80% chance of connection when needed
+                finish = Q.Empty()
+                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory)
+                currentNode.Adopt(n)
+                currentNode = n
+            else:
+                break
+        return currentNode
+
+    def HaltPoint(self,HaltNode:Node):
+        if(HaltNode.Finish):
+            return
+        else:
+            BlockTreeHalt = self.Block(HaltNode)
+            HaltNode.Adopt(self.Root(BlockTreeHalt))
+            self.HaltPoint(BlockTreeHalt)
+
+            HoldTreeHalt = self.Hold(HaltNode)
+            HaltNode.Adopt(self.Root(HoldTreeHalt))
+            self.HaltPoint(HoldTreeHalt)
+
+
+
+    def Block(self,HaltNode:Node):
+        nextNode = self.BackStep(HaltNode)
+        HaltNode.Adopt(nextNode)
+        return self.Continue(nextNode)
+
+    
+    def Hold(self,HaltNode:Node):
+        Q:TaskQueue = HaltNode.Q.__deepcopy__() #want to return a node with the same Q (just updated)
+        while(not self.ActionableTask(Q.Peek(),self.Status.Connected)):
+            Q.HoldTopTask()
+        if(not Q.Empty()):
+            t:Task = Q.PopTask()
+            n = self.NewNode(Q,t,False)
+            HaltNode.Adopt(n)
+            return self.Continue(n)
+        else:
+            x=0
+            #This shouldn't happen...throw a warning or something like that...
+        
+

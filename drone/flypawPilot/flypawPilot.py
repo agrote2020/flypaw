@@ -62,7 +62,7 @@ class FlyPawPilot(StateMachine):
         self.prometheusQueryURL = "http://" + self.basestationIP + ":9090/api/v1/query?query=" 
         #frame can be used for sendVideo or sendFrame depending on mission type
         self.frame = 1
-        self.radioMap = RadioMap()
+
         self.taskQ = TaskQueue()
         self.TaskIDGen = TaskIDGenerator() 
         self.CurrentTask =  Task(0,0,0,0,self.TaskIDGen.Get())
@@ -80,6 +80,7 @@ class FlyPawPilot(StateMachine):
         self.radio['lon'] = -78.69607
         self.RadioPosition = Position()
         self.RadioPosition.InitParams(self.radio['lon'], self.radio['lat'],0,0,0,0)
+        self.radioMap = RadioMap(self.RadioPosition)
         
         now = datetime.now()
         current_timestring = now.strftime("%Y%m%d-%H%M%S")
