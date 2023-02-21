@@ -897,4 +897,4 @@ class FlyPawBasestationAgent(object):
 
 if __name__ == '__main__':
     FPBA = FlyPawBasestationAgent()
-    FPBA.basestationDispatch()
+    FPBA.basestationDispatch_SIM()
