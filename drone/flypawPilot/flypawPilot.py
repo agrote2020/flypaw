@@ -1005,6 +1005,12 @@ class FlyPawPilot(StateMachine):
 
         #this may need a state of its own... reestablish connection
         if(self.communications['iperf']==0 and nextTask.comms_required):
+            # JSON_DUMP = json.dumps(self.taskQ)
+            # f = open("dump_taskq.txt")
+            # f.close()
+
+            print("sleep!!!!!!!")
+            time.sleep(200)
             ConnectionSeekingTasks = self.GetPathToConnection()#This should *almost*(why did I write almost so speculatively) always find a path.
             ReccomendedConnectionPath = self.PickPathToRestablish(ConnectionSeekingTasks)
 
