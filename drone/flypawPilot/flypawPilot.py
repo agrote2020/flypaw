@@ -57,7 +57,7 @@ class FlyPawPilot(StateMachine):
         self.logfiles = {}
         self.videoLocation = "/root/video/video_diff_resolution/example1/video_1280_720.mpg"
         self.frameLocation = "/root/video/video_diff_resolution/example_frames"
-        self.basestationIP = "172.16.0.2" #other side of the radio link
+        self.basestationIP = "172.16.0.1" #other side of the radio link
         self.videoURL = "udp://" + self.basestationIP + ":23000"
         self.prometheusQueryURL = "http://" + self.basestationIP + ":9090/api/v1/query?query=" 
         #frame can be used for sendVideo or sendFrame depending on mission type
