@@ -278,7 +278,7 @@ def processPlan_QGROUND_STANDARD(plan):
 """
 
 class FlyPawBasestationAgent(object):
-    def __init__(self, ipaddr="172.16.0.89", port=20001, chunkSize=1024) :
+    def __init__(self, ipaddr="172.16.0.1", port=20001, chunkSize=1024) :
         self.ipaddr = ipaddr
         self.port = port
         self.chunkSize = chunkSize
