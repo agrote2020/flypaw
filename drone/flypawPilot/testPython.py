@@ -190,8 +190,10 @@ wy.AddPoint(p,1)
 wy.AddPoint(p,1)
 wy.StackPop()
 tq = TaskQueue()
-stringJ = tq.to_json()
-print(stringJ)
+
+with open('json_dump_q.txt','w') as f:
+    f.write("HERE!")
+
 #print("empty?"+str(bool(wy._empty())))
 #if(not wy._empty()):
 #    print("wrong")
