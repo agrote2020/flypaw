@@ -782,7 +782,7 @@ class FlyPawPilot(StateMachine):
         iperfResult = self.runIperfSync(self.basestationIP, self.Drone)
         if self.communications['iperf'] == 1:
 
-            self.radioMap.Add(self.currentPosition.lat, self.currentPosition.lon,self.currentHeading,iperfResult['iperfResults']['mbps'],self.currentPosition.alt)
+            self.radioMap.Add(self.currentPosition.lat, self.currentPosition.lon,self.currentHeading,100.0,self.currentPosition.alt)
             self.communications['iperf'] = 1 #I thought this would happen in iperf call....but it doesn't...
             print("RadioMapLength:"+ str(self.radioMap.length))
             print("CONNECTION-GOOD!")
