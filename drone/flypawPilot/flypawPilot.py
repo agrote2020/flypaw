@@ -861,6 +861,10 @@ class FlyPawPilot(StateMachine):
                 print("no reply from server while transmitting iperfResults")
                 self.communications['iperf'] = 0
         #delete the iperf3 client to avoid errors
+        print("IPERF_CALL_RESULTS:")
+        print("MBPS: "+ str(msg['iperfResults']['mbps']))
+        print("---------------")
+        
         del client
         return msg
 
