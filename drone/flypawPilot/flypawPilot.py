@@ -1014,8 +1014,7 @@ class FlyPawPilot(StateMachine):
             # f = open("dump_taskq.txt")
             # f.close()
 
-            print("sleep!!!!!!!")
-            time.sleep(200)
+
             ConnectionSeekingTasks = self.GetPathToConnection()#This should *almost*(why did I write almost so speculatively) always find a path.
             ReccomendedConnectionPath = self.PickPathToRestablish(ConnectionSeekingTasks)
 
