@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+import dataclass_wizard
 from dataclass_wizard import JSONWizard
 from argparse import Action
 from ast import Str
