@@ -1,3 +1,6 @@
+from __future__ import annotations
+from dataclasses import dataclass, field
+from dataclass_wizard import JSONWizard
 from argparse import Action
 from ast import Str
 from asyncio import tasks
