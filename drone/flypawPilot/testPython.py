@@ -4,6 +4,7 @@ from dataclass_wizard import JSONWizard
 from ast import Str
 from turtle import position
 import json
+import jsonpickle
 
 
 
@@ -29,7 +30,7 @@ class Task(object):
         self.TimeSensitive = sensitive
         self.priority = prio
 
-@dataclass
+
 class TaskQueue(JSONWizard):
 
     def __init__(self):
@@ -190,9 +191,17 @@ wy.AddPoint(p,1)
 wy.AddPoint(p,1)
 wy.StackPop()
 tq = TaskQueue()
+tq.Count = 1
+#stringJ = tq.to_json()
+jsonobj = jsonpickle.encode(tq)
+print(jsonobj)
 
+#print(json.dumps(tq.__dict__))
+
+print(tq.Count)
+#print(stringJ)
 with open('json_dump_q.txt','w') as f:
-    f.write("HERE!")
+    f.write(jsonobj)
 
 #print("empty?"+str(bool(wy._empty())))
 #if(not wy._empty()):

@@ -1,7 +1,3 @@
-from __future__ import annotations
-from dataclasses import dataclass, field
-import dataclass_wizard
-from dataclass_wizard import JSONWizard
 from argparse import Action
 from ast import Str
 from asyncio import tasks
@@ -11,6 +7,7 @@ from turtle import back, position
 from typing import Iterator
 import requests
 import json
+import jsonpickle
 
 #import geojson
 import time
@@ -1015,7 +1012,7 @@ class FlyPawPilot(StateMachine):
 
         #this may need a state of its own... reestablish connection
         if(self.communications['iperf']==0 and nextTask.comms_required):
-            JSON_DUMP = self.taskQ.to_json()
+            JSON_DUMP = jsonpickle.encode(self.taskQ)
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)
 
