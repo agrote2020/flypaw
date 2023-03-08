@@ -7,6 +7,11 @@ from turtle import back, position
 from typing import Iterator
 import requests
 import json
+
+def to_json(obj):
+    return json.dumps(obj, default=lambda obj: obj.__dict__)
+
+
 #import geojson
 import time
 import sys
@@ -1012,7 +1017,7 @@ class FlyPawPilot(StateMachine):
         if(self.communications['iperf']==0 and nextTask.comms_required):
             JSON_DUMP = json.dumps(self.taskQ)
             f = open("dump_taskq.txt")
-            f.write(JSON_DUMP)
+            f.write(to_json(self.taskQ))
             f.close()
 
 
