@@ -12,10 +12,6 @@ from typing import Iterator
 import requests
 import json
 
-def to_json(obj):
-    return json.dumps(obj, default=lambda obj: obj.__dict__)
-
-
 #import geojson
 import time
 import sys
@@ -1019,9 +1015,9 @@ class FlyPawPilot(StateMachine):
 
         #this may need a state of its own... reestablish connection
         if(self.communications['iperf']==0 and nextTask.comms_required):
-            JSON_DUMP = json.dumps(self.taskQ)
+            JSON_DUMP = self.taskQ.to_json()
             f = open("dump_taskq.txt")
-            f.write(to_json(self.taskQ))
+            f.write(JSON_DUMP)
             f.close()
 
 
