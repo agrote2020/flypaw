@@ -430,7 +430,7 @@ class RadioMap(object):
 
         if(rate>0):
             x =0
-            geo = Geodesic.WGS84.Inverse(pos.lat, pos.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+            geo = Geodesic.WGS84.Inverse(pos.lat, pos.lon, self.radioPosition.lat,self.radioPosition.lon)
             distance_to_radio = geo.get('s12')
             if distance_to_radio>self.maxDistance:
                 self.maxDistance = distance_to_radio
@@ -441,7 +441,7 @@ class RadioMap(object):
 
     def ConnectionProbabilty(self,currentPosition):
         rMax = self.maxDistance
-        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radioPosition.lat,self.radioPosition.lon)
         d = geo.get('s12')
         if(d<1.05*rMax):
             return 0.95
