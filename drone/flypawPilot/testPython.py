@@ -1,5 +1,11 @@
+from __future__ import annotations
+from dataclasses import dataclass, field
+from dataclass_wizard import JSONWizard
 from ast import Str
 from turtle import position
+import json
+
+
 
 
 class RadioMap(object):
@@ -23,7 +29,8 @@ class Task(object):
         self.TimeSensitive = sensitive
         self.priority = prio
 
-class TaskQueue(object):
+@dataclass
+class TaskQueue(JSONWizard):
 
     def __init__(self):
         self.queue = []
@@ -182,8 +189,11 @@ wy.AddPoint(p,1)
 wy.AddPoint(p,1)
 wy.AddPoint(p,1)
 wy.StackPop()
-print("empty?"+str(bool(wy._empty())))
-if(not wy._empty()):
-    print("wrong")
+tq = TaskQueue()
+stringJ = tq.to_json()
+print(stringJ)
+#print("empty?"+str(bool(wy._empty())))
+#if(not wy._empty()):
+#    print("wrong")
 
 

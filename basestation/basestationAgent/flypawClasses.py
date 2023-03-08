@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+from dataclasses import dataclass, field
+from dataclass_wizard import JSONWizard
 import json
 import copy
 from pickle import FALSE
@@ -223,8 +226,8 @@ class IDGenerator(object):
     def Check(self):
         return self
     
-
-class TaskQueue(object):
+@dataclass
+class TaskQueue(JSONWizard):
 
     def __init__(self):
         self.queue = []
