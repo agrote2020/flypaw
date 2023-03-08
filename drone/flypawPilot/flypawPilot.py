@@ -863,6 +863,7 @@ class FlyPawPilot(StateMachine):
         #delete the iperf3 client to avoid errors
         print("IPERF_CALL_RESULTS:")
         print("MBPS: "+ str(msg['iperfResults']['mbps']))
+        print("CONNECTION: "+ str(msg['iperfResults']['connection']))
         print("---------------")
         
         del client
