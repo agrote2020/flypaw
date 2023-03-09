@@ -9,6 +9,7 @@ import requests
 import json
 import jsonpickle
 
+
 #import geojson
 import time
 import sys
@@ -301,6 +302,7 @@ class FlyPawPilot(StateMachine):
         #something here is not behaving as expected
         if not drone.armed:
             print("drone not armed. Arming")
+            time.sleep(5)
             await drone.set_armed(True)
             print("arming complete")
         else:
