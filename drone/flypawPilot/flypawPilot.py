@@ -116,7 +116,7 @@ class FlyPawPilot(StateMachine):
         logState(self.logfiles['state'], "preflight")
         
         #certain failures cause preflight to restart so let's sleep for seconds upon entry
-        time.sleep(5)
+        time.sleep(1)
         
         self.missionstate = "preflight"
         self.Drone = drone
