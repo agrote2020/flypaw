@@ -36,13 +36,19 @@ with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypaw
 with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
     wph = jsonpickle.decode(f.read())
 
+with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_t.txt",'r') as f: #for laptop
+    t = jsonpickle.decode(f.read())
+with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_id.txt",'r') as f: #for laptop
+    id:TaskIDGenerator = jsonpickle.decode(f.read())
+
 #print(tq)
 print('count:' + str(tq.Count))
 print('count:' + str(wph.Count))
+print("CURRENT" + str(id.CurrentTaskID))
 tq.PrintQ()
 
 
-#root =  Node(tq,)
+#root =  Node(0,tq,t,0,0,wph,)
 
 
 #print("empty?"+str(bool(wy._empty())))
