@@ -112,7 +112,9 @@ class FlyPawPilot(StateMachine):
         """
         preflight mission assignment and various status and safety checks and registrations
         """
-        
+
+        print(f"gps: {vehicle.gps} \t fix type: {vehicle.gps.fix_type}")
+        print(f"gps: {vehicle._vehicle.gps_0}")
         logState(self.logfiles['state'], "preflight")
         
         #certain failures cause preflight to restart so let's sleep for seconds upon entry
