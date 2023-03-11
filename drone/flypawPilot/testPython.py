@@ -19,7 +19,7 @@ sys.path.append( 'C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\basest
 from flypawClasses import *
 
 
-tq = TaskQueue()
+tq:TaskQueue = TaskQueue()
 tq.Count = 1
 # #stringJ = tq.to_json()
 # jsonobj = jsonpickle.encode(tq)
@@ -29,12 +29,21 @@ tq.Count = 1
 
 
 # #print(stringJ)
-#with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f: #for desktop
+#with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f: #~~~~~~~~~~~~~for desktop~~~~~~~~~~~
 with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt",'r') as f: #for laptop
     tq = jsonpickle.decode(f.read())
 
+with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
+    wph = jsonpickle.decode(f.read())
+
 #print(tq)
 print('count:' + str(tq.Count))
+print('count:' + str(wph.Count))
+tq.PrintQ()
+
+
+#root =  Node(tq,)
+
 
 #print("empty?"+str(bool(wy._empty())))
 #if(not wy._empty()):
