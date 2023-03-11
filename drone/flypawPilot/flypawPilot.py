@@ -419,6 +419,12 @@ class FlyPawPilot(StateMachine):
         JSON_DUMP_TASK = jsonpickle.encode(self.WaypointHistory)
         with open('json_dump_t.txt','w') as f:
             f.write(JSON_DUMP_TASK)
+        JSON_DUMP_ID_GEN = jsonpickle.encode(self.WaypointHistory)
+        with open('json_dump_id.txt','w') as f:
+            f.write(JSON_DUMP_ID_GEN)
+
+
+
         self.EvaluateTaskQ()
 
         #abort mission if Q is empty
