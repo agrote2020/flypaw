@@ -1015,8 +1015,11 @@ class FlyPawPilot(StateMachine):
         #this may need a state of its own... reestablish connection
         if(self.communications['iperf']==0 and nextTask.comms_required):
             JSON_DUMP = jsonpickle.encode(self.taskQ)
+            JSON_DUMP_WPH = jsonpickle.encode(self.WaypointHistory)
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)
+            with open('json_dump_wph.txt','w') as f:
+                f.write(JSON_DUMP_WPH)
 
 
             ConnectionSeekingTasks = self.GetPathToConnection()#This should *almost*(why did I write almost so speculatively) always find a path.

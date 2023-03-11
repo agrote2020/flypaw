@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from dataclass_wizard import JSONWizard
+
 from ast import Str
 from turtle import position
 import json
@@ -13,7 +13,8 @@ import os
 import sys
 script_dir = os.path.dirname( 'flypawClasses.py' )
 mymodule_dir = os.path.join( script_dir, '..','..','basestation', 'basestationAgent' )
-sys.path.append( 'C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
+#sys.path.append( 'C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
+sys.path.append( 'C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
 
 from flypawClasses import *
 
@@ -28,8 +29,8 @@ tq.Count = 1
 
 
 # #print(stringJ)
-
-with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f:
+#with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f: #for desktop
+with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt",'r') as f: #for laptop
     tq = jsonpickle.decode(f.read())
 
 #print(tq)
