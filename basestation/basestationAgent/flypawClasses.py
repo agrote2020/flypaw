@@ -481,14 +481,17 @@ class RadioMap(object):
 
 class Node(object):#Interdependent PredictiveTree Class, can exist without one, but its hopelessly lost  :(
     def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator):
-        self.Q = q.__deepcopy__()
+        self.q_memo = dict()
+        self.id_memo = dict()
+        self.wph_memo = dict()
+        self.Q = q.__deepcopy__(self.q_memo)
         self.ID = ID_num #identifies node
         self.Parent = -1 #  -1 represents orphan status
         self.Children = []
         self.Finish = finish
         self.LeadingTask = task
-        self.TravelHistory = waypointHistory.__deepcopy__()
-        self.ID_GEN = id_gen.__deepcopy__()
+        self.TravelHistory = waypointHistory.__deepcopy__(self.wph_memo)
+        self.ID_GEN = id_gen.__deepcopy__(self.id_memo)
         self.Connected = connected
 
 

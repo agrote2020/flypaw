@@ -44,11 +44,13 @@ with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypaw
 #print(tq)
 print('count:' + str(tq.Count))
 print('count:' + str(wph.Count))
-print("CURRENT" + str(id.CurrentTaskID))
-tq.PrintQ()
+print("CURRENT " + str(id.CurrentTaskID))
+#tq.PrintQ()
 
 
-#root =  Node(0,tq,t,0,0,wph,)
+root:Node =  Node(0,tq,t,0,0,wph,id)
+tree:PredictiveTree = PredictiveTree(root)
+
 
 
 #print("empty?"+str(bool(wy._empty())))
