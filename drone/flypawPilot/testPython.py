@@ -34,7 +34,7 @@ with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypaw
     tq = jsonpickle.decode(f.read())
 
 with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
-    wph = jsonpickle.decode(f.read())
+    wph:WaypointHistory = jsonpickle.decode(f.read())
 
 with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_t.txt",'r') as f: #for laptop
     t = jsonpickle.decode(f.read())
@@ -47,10 +47,13 @@ print('count:' + str(wph.Count))
 print("CURRENT " + str(id.CurrentTaskID))
 #tq.PrintQ()
 
-
-root:Node =  Node(0,tq,t,0,0,wph,id)
+emptyList = list()
+root:Node =  Node(0,tq,t,0,0,wph,id,emptyList)
 tree:PredictiveTree = PredictiveTree(root)
-
+tree.HaltPoint(root)
+tree.PrintNodes()
+tree.BranchAnalyze()
+tree.testBranchDistance(tree.BranchNodes[0])
 
 
 #print("empty?"+str(bool(wy._empty())))

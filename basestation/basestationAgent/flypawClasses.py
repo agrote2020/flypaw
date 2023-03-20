@@ -276,9 +276,9 @@ class TaskQueue(object):
         elif(self.Count>0): 
             return False
 
-    def Peek(self):
-        if(not self._empty()):
-            return self.queue(self.Count)
+    def Peek(self):#Same function as next ???
+        if(not self.Empty()):
+            return self.queue[self.Count-1]
         else:
             return None
 
@@ -322,6 +322,7 @@ class WaypointHistory(object):
 
 
     def __deepcopy__(self, memo):
+        #print('Class'+ str(self.__class__))
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
@@ -370,12 +371,12 @@ class WaypointHistory(object):
         while((not Connected)and (not self._empty())):
             if(self.PeekConnectivity()):
                 Step = self.StackPop()
-                print("Step Popped: "+ str(Step))
+                #print("Step Popped: "+ str(Step))
                 StepsBack.append(Step)
                 Connected = 1
             else:
                 Step = self.StackPop()
-                print("Step Popped: "+ str(Step))
+                #print("Step Popped: "+ str(Step))
                 StepsBack.append(Step)
                 StepsForward.insert(0,Step)
         if(self._empty() and (not Connected)):
@@ -480,19 +481,22 @@ class RadioMap(object):
 
 
 class Node(object):#Interdependent PredictiveTree Class, can exist without one, but its hopelessly lost  :(
-    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator):
+    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator,decisionStack:list):
         self.q_memo = dict()
         self.id_memo = dict()
         self.wph_memo = dict()
+        self.ds_memo = dict()
         self.Q = q.__deepcopy__(self.q_memo)
         self.ID = ID_num #identifies node
         self.Parent = -1 #  -1 represents orphan status
         self.Children = []
         self.Finish = finish
         self.LeadingTask = task
-        self.TravelHistory = waypointHistory.__deepcopy__(self.wph_memo)
+        self.Position = task.position
+        self.TravelHistory:WaypointHistory = waypointHistory.__deepcopy__(self.wph_memo)
         self.ID_GEN = id_gen.__deepcopy__(self.id_memo)
         self.Connected = connected
+        self.DecisionStack = copy.deepcopy(decisionStack,self.ds_memo)
 
 
 
@@ -507,7 +511,24 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
 
     def Adopt(self,child):
         self.Children.append(child.ID)
-        child.accept(self)
+        child.Accept(self)
+        #print('adopt!')
+
+    def Print(self):
+        print('Node:'+ str(self.ID))
+        print('Node Parent:'+ str(self.Parent))
+        if(self.Children.__len__()):
+            for i, child in enumerate(self.Children):
+                print('Child:'+ str(child))
+        else:
+            print("END OF BRANCH")
+
+
+    def ChildrenCount(self):
+        return self.Children.count
+
+
+
 
 class TreeStatusHolder(object):
     def __init__(self):
@@ -556,27 +577,84 @@ class TaskHold(object):
 class PredictiveTree(object):
     def __init__(self,root:Node):
         self.Nodes = []
+        self.NodeMap = dict()
         self.Root = root
         self.ID_Gen = IDGenerator()
         self.TasksHeld = TaskHold()
         self.maxDistance = 150 #this should be passed in eventually i.e. Dynamic
         self.Status = TreeStatusHolder()
+        self.radio = {}
+        self.radio['lat'] = 35.72744
+        self.radio['lon'] = -78.69607
+        self.RadioPosition = Position()
+        self.RadioPosition.InitParams(self.radio['lon'], self.radio['lat'],0,0,0,0)
+        self.BranchEnds = list()
+        self.BranchNodes = list()
         
 
+    def PrintNodes(self):
+        for i, n in enumerate(self.Nodes):
+            n.Print()
+            print("-------------------")
+
+
+    #Naive linear search--this is pretty inefficient :(
+    def GetNode(self,key):
+        x=0
+
+        for i, n in enumerate(self.Nodes):
+            if(n.ID == key):
+                return n
         
 
-    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory):#deines a new node and adds it to the list of nodes
+##Stop using--------------------------------------
+
+    def CountBranches(self):
+        branches = 0
+        
+        for i, n in enumerate(self.Nodes):
+            if(not (n.Children.__len__())):
+                branches = branches + 1
+                self.BranchEnds.append(n.ID)
+        print("Branches: "  + str(branches))
+
+##Stop using^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    def BranchAnalyze(self):
+        branches = 0
+        
+        for i, n in enumerate(self.Nodes):
+            if(not (n.Children.__len__())):
+                branches = branches + 1
+                self.BranchEnds.append(n.ID)
+                self.BranchNodes.append(n)
+        print("Branches: "  + str(self.BranchEnds))
+        for i, n in enumerate(self.BranchNodes):
+            print("")
+            print("Branch ID: "+ str(n.ID))
+            print("DECISIONS: "+ str(n.DecisionStack))
+            print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+
+
+    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory,id_gen:TaskIDGenerator,ds:list):#deines a new node and adds it to the list of nodes
+
+        memo_id = dict()
+
         id  =  self.ID_Gen.Get()
-        waypointHistory:WaypointHistory = prevWaypointHistory.__deepcopy__()
+
+        id_gen_cpy = id_gen.__deepcopy__(memo_id)
+
         if(t.task=="FLIGHT"):
-            waypointHistory.AddPoint(t.position,connected)
-        newNode = Node(id,taskQ,t,finish,connected,waypointHistory)
+            prevWaypointHistory.AddPoint(t.position,connected)
+        newNode = Node(id,taskQ,t,finish,connected,prevWaypointHistory,id_gen_cpy,ds)
         self.Nodes.append(newNode)
+        self.NodeMap[newNode.ID] = newNode
+        
         return newNode
 
     def ConnectionProbabilty(self,currentPosition):
         rMax = self.maxDistance
-        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radioPosition['lat'],self.radioPosition['lon'])
+        geo = Geodesic.WGS84.Inverse(currentPosition.lat, currentPosition.lon, self.radio['lat'],self.radio['lon'])
         d = geo.get('s12')
         if(d<1.05*rMax):
             return 0.95
@@ -597,16 +675,52 @@ class PredictiveTree(object):
         x=0
     def AnalyzeOptions():#stub for now
         x=0
-    def Root(self,n:Node):#returns the root of a given node
+    def GetRoot(self,n:Node):#returns the root of a given node
         if(n.Parent == -1):
             return n
         else:
-            return self.Root(self.Nodes[self.Parent])
+            return self.GetRoot(self.NodeMap[n.Parent])
+
+
+    def GetBranchDistance(self,branch:list):
+        x=0
+        distance = 0
+        for i, n in enumerate(branch):
+            if( i < (branch.__len__() -2)):
+                start:Position = branch[i].Position
+                end:Position = branch[i+1].Position
+                geo = Geodesic.WGS84.Inverse(start.lat, start.lon, end.lat,end.lon)
+                distance = distance + geo.get('s12')
+
+            
+            
+
+        
+
+    
+    def GetFullBranch(self,leaf:Node):
+        x=0
+        branch = list()
+        n:Node = leaf
+        while(not (n.Parent ==-1)):
+            branch.append(n)
+            n = self.NodeMap[n.Parent]
+        branch.append(n)
+        return branch.reverse()
+    
+        
+    def testBranchDistance(self,leaf:Node):
+        x=0
+        branch = self.GetFullBranch(leaf)
+        d = self.GetBranchDistance(branch)
 
 
     def BackStep(self,node:Node):
-        Q = node.Q.__deepcopy__()
-        wph:WaypointHistory = node.TravelHistory().__deepcopy__()
+        memo_wph = dict()
+        memo_q = dict()
+        Q = node.Q.__deepcopy__(memo_q)
+        #print('Class'+ str(node.TravelHistory.__class__))
+        wph:WaypointHistory = node.TravelHistory.__deepcopy__(memo_wph)
 
         
         # Update Q here to return to connection complete task, then return on same path
@@ -621,40 +735,35 @@ class PredictiveTree(object):
         for idx, waypoint in enumerate(backSteps):
  
             if(waypoint[1]):
-                print("Appending Next Task!")
+                #print("Appending Next Task!")
                 taskConversion.append(nextTask)
-            t = Task(waypoint[0],"FLIGHT",0,0,self.TaskIDGen.Get())
+            t = Task(waypoint[0],"FLIGHT",0,0,node.ID_GEN)
             t.dynamicTask = True
-            print("TASK ID: "+str(waypoint[2])) 
+            #print("TASK ID: "+str(waypoint[2])) 
             taskConversion.append(t)
         
 
-        BackTrackTaskList = taskConversion
-        ForwardSteps = self.FindFowardConnection()
-        taskConversion = []
-        #for now, lets just return a list of two tasks sets, but this should be an object in the future
-        taskConversion.append(BackTrackTaskList)
-        if(len(ForwardSteps)):
-            taskConversion.append(ForwardSteps)
-
-        t = self.taskQ.PopTask()
-        self.taskQ.AppendTasks(taskConversion)
+        
 
 
-        n = self.NewNode(Q,t,False,False,wph)
+        t = Q.PopTask()
+        Q.AppendTasks(taskConversion)
+
+
+        n = self.NewNode(Q,t,False,False,wph,node.ID_GEN,node.DecisionStack)
         return n
         
 
 
     def CheckHold(self,Q:TaskQueue):
         if(self.Status.Connected):
-            while(not Q.TaskHold.Captives):
+            while(not Q.TaskLock.Captives):
                 t_ref:Task = Q.Release()
 
 
     def ActionableTask(self,t:Task,connected):#maybe this can be expanded to check battery etc.
         if(t.task == "SEND_DATA"):
-            return connected #this means if we have a send task, its actionable if we have a connection
+            return connected #this means if we have a send task, its actionable I.F.F. we have a connection
         else:
             return True
 
@@ -662,29 +771,41 @@ class PredictiveTree(object):
     def ConnectionThreshold(self,position,threshold):
         probabilty = self.ConnectionProbabilty(position)
         if(probabilty>threshold):
+            self.Status.Connected = True
             return True
         else:
+            self.Status.Connected = False
             return False
     
 
     def Continue(self,nextNode:Node):
-        Q = nextNode.Q.__deepcopy__()
+        memo_q = dict()
+        Q = nextNode.Q.__deepcopy__(memo_q)
         currentNode:Node = nextNode
         self.Status.Update(currentNode.LeadingTask.position,currentNode.Connected)
         
 
 
-        while(not Q.Empty):
+        while(not Q.Empty()):
             self.CheckHold(Q)
-            t:Task = Q.pop()
+            t:Task = Q.PopTask()
 
             if(self.ActionableTask(t,self.Status.Connected)):#for now let's only continue that have success of >80%, others halt.Hypothetically, we could adopt both a failure and success node for each continue...this would be ideal...
                 nextLocationConnected = self.ConnectionThreshold(t.position,0.80) #for now, were only persuing options with a greater than 80% chance of connection when needed
                 finish = Q.Empty()
-                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory)
+                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack)
                 currentNode.Adopt(n)
                 currentNode = n
             else:
+                probabilty = self.ConnectionProbabilty(t.position)
+                finish = Q.Empty()
+                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack)
+                n.DecisionStack.append("LOF")#Leap of faith! P/F
+                currentNode.Adopt(n)
+                currentNode = n
+                if(probabilty>0.01):
+                    self.Continue(currentNode) #assumes success
+                    self.HaltPoint(currentNode) #assumes failure
                 break
         return currentNode
 
@@ -693,28 +814,34 @@ class PredictiveTree(object):
             return
         else:
             BlockTreeHalt = self.Block(HaltNode)
-            HaltNode.Adopt(self.Root(BlockTreeHalt))
+            print('BLOCK-ADOPTED')
+            #HaltNode.Adopt(self.GetRoot(BlockTreeHalt))
             self.HaltPoint(BlockTreeHalt)
 
+
             HoldTreeHalt = self.Hold(HaltNode)
-            HaltNode.Adopt(self.Root(HoldTreeHalt))
+            print('HOLD-ADOPTED')
+            #HaltNode.Adopt(self.GetRoot(HoldTreeHalt)) 
             self.HaltPoint(HoldTreeHalt)
 
 
 
     def Block(self,HaltNode:Node):
         nextNode = self.BackStep(HaltNode)
+        nextNode.DecisionStack.append("BLOCK")
         HaltNode.Adopt(nextNode)
         return self.Continue(nextNode)
 
     
     def Hold(self,HaltNode:Node):
-        Q:TaskQueue = HaltNode.Q.__deepcopy__() #want to return a node with the same Q (just updated)
+        memo_q = dict()
+        Q:TaskQueue = HaltNode.Q.__deepcopy__(memo_q) #want to return a node with the same Q (just updated)
         while(not self.ActionableTask(Q.Peek(),self.Status.Connected)):
             Q.HoldTopTask()
         if(not Q.Empty()):
             t:Task = Q.PopTask()
-            n = self.NewNode(Q,t,False)
+            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack)
+            n.DecisionStack.append("HOLD")
             HaltNode.Adopt(n)
             return self.Continue(n)
         else:
