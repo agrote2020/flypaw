@@ -46,14 +46,17 @@ print('count:' + str(tq.Count))
 print('count:' + str(wph.Count))
 print("CURRENT " + str(id.CurrentTaskID))
 #tq.PrintQ()
-
+t = tq.NextTask()
+pt = TaskPenaltyTracker()
 emptyList = list()
-root:Node =  Node(0,tq,t,0,0,wph,id,emptyList)
+root:Node =  Node(0,tq,t,0,0,wph,id,emptyList,pt)
 tree:PredictiveTree = PredictiveTree(root)
-tree.HaltPoint(root)
+tree.HaltPoint(False)
 tree.PrintNodes()
 tree.BranchAnalyze()
-tree.testBranchDistance(tree.BranchNodes[0])
+#tree.BranchDistances()
+#tree.DELAY_PRINT_TEST()
+
 
 
 #print("empty?"+str(bool(wy._empty())))
