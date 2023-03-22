@@ -351,7 +351,8 @@ class TaskQueue(object):
 
 
     def Release(self):
-        return self.TaskLock.ReleaseTask()
+        task = self.TaskLock.ReleaseTask()
+        self.AppendTask(task)
 
 
 
@@ -389,7 +390,7 @@ class WaypointHistory(object):
         self.WaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
         self.TrueWaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
         self.Count = self.Count + 1
-        self.TrueCount = self.TrueCount+1
+        self.TrueCount = self.TrueCount + 1
 
     def StackPop(self):#return tuple
         if(not self._empty()):
@@ -598,10 +599,11 @@ class TreeStatusHolder(object):
 
 class TaskHold(object):
     def __init__(self):
-        self.Captives = list
-        self.Reasons = list
+        self.Captives = []
+        self.Reasons = []
 
-    def HoldTask(self, t:Task):
+
+    def HoldTask(self, t):
         self.Captives.append(t)
         self.Reasons.append("CONNECTION")
 
@@ -617,7 +619,9 @@ class TaskHold(object):
             setattr(result, k, copy.deepcopy(v, memo))
         return result
 
-
+    def __RESET__(self):
+        self.Captives = []
+        self.Reasons = []
 
 
 
@@ -833,8 +837,8 @@ class PredictiveTree(object):
 
     def CheckHold(self,Q:TaskQueue):
         if(self.Status.Connected):
-            while(not Q.TaskLock.Captives):
-                t_ref:Task = Q.Release()
+            while(Q.TaskLock.Captives):
+                Q.Release()
 
 
     def ActionableTask(self,t:Task,connected):#maybe this can be expanded to check battery etc.
@@ -846,7 +850,7 @@ class PredictiveTree(object):
 
     def ConnectionThreshold(self,position,threshold):
         probabilty = self.ConnectionProbabilty(position)
-        if(probabilty>threshold):
+        if(probabilty>=threshold):
             self.Status.Connected = True
             return True
         else:
@@ -874,14 +878,14 @@ class PredictiveTree(object):
 
             #this ~if~ block seems redundant and wrong?
             if(self.ActionableTask(t,self.Status.Connected)):#Can we changes this to 100% Certainity only? THIS BLOCK ASSUMES task `t` has ~100%
-                nextLocationConnected = self.ConnectionThreshold(t.position,1.00) #for now, were only persuing options with a greater than 80% chance of connection when needed
+                nextLocationConnected = self.ConnectionThreshold(t.position,1.00)
                 finish = Q.Empty()
                 n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker)
                 n.PenaltyTracker.Penalize(t,previousPosition)
                 currentNode.Adopt(n)
                 currentNode = n
-                if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
-                    currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
+                # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
+                #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
                 probabilty = self.ConnectionProbabilty(t.position)
                 finish = Q.Empty()
@@ -903,13 +907,13 @@ class PredictiveTree(object):
         else:
             BlockTreeHalt = self.Block(HaltNode)
             print('BLOCK-ADOPTED')
-            #HaltNode.Adopt(self.GetRoot(BlockTreeHalt))
+
             self.HaltPoint(BlockTreeHalt)
 
 
             HoldTreeHalt = self.Hold(HaltNode)
             print('HOLD-ADOPTED')
-            #HaltNode.Adopt(self.GetRoot(HoldTreeHalt)) 
+
             self.HaltPoint(HoldTreeHalt)
 
 
@@ -925,7 +929,11 @@ class PredictiveTree(object):
         nodesHeld = list()
         memo_q = dict()
         Q:TaskQueue = HaltNode.Q.__deepcopy__(memo_q) #want to return a node with the same Q (just updated)
-        while(not self.ActionableTask(Q.Peek(),self.Status.Connected)):
+        nextTask = Q.Peek()
+        currentPosition = Q.Peek().position
+        connected = self.ConnectionThreshold(Q.Peek().position,1.00)
+        self.Status.Update(currentPosition,connected)
+        while(not self.ActionableTask(Q.Peek(),connected)):
             nodesHeld.append(Q.Peek())
             Q.HoldTopTask()
         if(not Q.Empty()):
@@ -935,7 +943,7 @@ class PredictiveTree(object):
             n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker)
             n.DecisionStack.append("HOLD")
             for n_held in nodesHeld:
-                n.PenaltyTracker.AddTask(n_held.LeadingTask.uniqueID)
+                n.PenaltyTracker.AddTask(n_held.uniqueID)
             HaltNode.Adopt(n)
             return self.Continue(n)
         else:
