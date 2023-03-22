@@ -4,6 +4,8 @@ import copy
 from pickle import FALSE
 from queue import Empty
 from geographiclib.geodesic import Geodesic
+import jsonpickle
+from datetime import datetime
 
 
 class Position(object):
@@ -223,61 +225,6 @@ class IDGenerator(object):
     def Check(self):
         return self
     
-class TaskPenaltyTracker(object):
-    def __init__(self):
-        x=0
-        self.taskID = list()    
-        self.taskStatus = list()    
-        self.taskDelay = list()    
-
-    def AddTask(self, TaskID):
-        self.taskID.append(TaskID)
-        self.taskStatus.append("HANGING")
-        self.taskDelay.append(0)
-
-    def Penalize(self,leadingAction:Task, previousLocation:Position):
-        ActionTimeEstimate = self.DelayEstimator(leadingAction,previousLocation)
-        for i, t in enumerate(self.taskID):
-            if(self.taskStatus[i]=="HANGING"):
-                self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
-            if(leadingAction.uniqueID==self.taskID[i]):
-                self.taskStatus[i] = "COMPLETE"
-
-    def Print(self):
-        print("PenalizedTasks: " + str(self.taskID.__len__()))
-        for i, n in enumerate(self.taskID):
-            print("")
-            print("Task: " + str(self.taskID[i]))
-            print("Status: " + str(self.taskStatus[i]))
-            print("Delay: " + str(self.taskDelay[i]))
-            print("")
-
-
-    def CompleteTask(self,taskID):
-        self.taskStatus[self.FindTaskByID(taskID)]="COMPLETE"
-
-    def FindTaskByID(self,id):#naive :(
-        for i, t in enumerate(self.taskID):
-            if(self.taskID[i]==id):
-                return i
-    def DelayEstimator(self,action:Task, prev:Position):
-        speed = 10 #m/s
-        if(action.task=="FLIGHT"):
-            start:Position = prev
-            end:Position = action.position
-            geo = Geodesic.WGS84.Inverse(start.lat, start.lon, end.lat,end.lon)
-            distance = geo.get('s12')
-            return distance/speed
-        else:
-            return 1.0
-        
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, copy.deepcopy(v, memo))
-        return result
 
 class TaskQueue(object):
 
@@ -363,6 +310,107 @@ class TaskQueue(object):
         for k, v in self.__dict__.items():
             setattr(result, k, copy.deepcopy(v, memo))
         return result
+
+
+
+    
+    
+
+
+class TaskPenaltyTracker(object):
+    def __init__(self, Q:TaskQueue):
+        
+        self.taskID = list()    
+        self.taskStatus = list()    
+        self.taskDelay = list()   
+        
+        for t in Q.queue:
+            if(t.comms_required):
+                self.AddTask(t.uniqueID)
+
+    def AddTask(self, TaskID):
+        if( (self.FindTaskByID(TaskID)==-1)):
+            self.taskID.append(TaskID)
+            self.taskStatus.append("HANGING")
+            self.taskDelay.append(0)
+
+    def Penalize(self,leadingAction:Task, previousLocation:Position):
+        ActionTimeEstimate = self.DelayEstimator(leadingAction,previousLocation)
+        for i, t in enumerate(self.taskID):
+            if(self.taskStatus[i]=="HANGING"):
+                self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
+            if(leadingAction.uniqueID==self.taskID[i]):
+                self.taskStatus[i] = "COMPLETE"
+
+    def Print(self):
+        #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
+        for i, n in enumerate(self.taskID):
+            print("Task: " + str(self.taskID[i]))
+            print("Status: " + str(self.taskStatus[i]))
+            print("Delay: " + str(self.taskDelay[i]))
+            print("")
+
+
+    def CompleteTask(self,taskID):
+        if(not (self.FindTaskByID(taskID)==-1)):
+            self.taskStatus[self.FindTaskByID(taskID)]="COMPLETE"
+
+    def FindTaskByID(self,id):#naive :(
+        index = -1
+        for i, t in enumerate(self.taskID):
+            if(self.taskID[i]==id):
+                index = i
+        return index
+    def DelayEstimator(self,action:Task, prev:Position):
+        speed = 10 #m/s
+        if(action.task=="FLIGHT"):
+            start:Position = prev
+            end:Position = action.position
+            geo = Geodesic.WGS84.Inverse(start.lat, start.lon, end.lat,end.lon)
+            distance = geo.get('s12')
+            return distance/speed
+        else:
+            return 1.0
+        
+    def TotalDelay(self):
+        total = 0
+        for d in self.taskDelay:
+            total = d + total
+        return total
+        
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
+
+class TaskPenaltyNormalizer(object):
+    def __init__(self,q:TaskQueue):
+        self.memo_q = {}
+        self.Q = q.__deepcopy__(self.memo_q)
+        self.Base:TaskPenaltyTracker = TaskPenaltyTracker(self.Q)
+        t:Task = self.Q.PopTask()
+        currentPosition = t.position
+        prevPosition = t.position
+        self.Base.Penalize(t,prevPosition)
+        while(not self.Q.Empty()):
+            t = self.Q.PopTask()
+            self.Base.Penalize(t,prevPosition)
+            prevPosition = currentPosition
+        self.Base.Print()
+
+    def Normailze(self,PenaltyTracker:TaskPenaltyTracker):
+        memo_pt = dict()
+        Normalized = PenaltyTracker.__deepcopy__(memo_pt)
+        for i, task in enumerate(Normalized.taskDelay):
+            x=0
+            Normalized.taskDelay[i] = Normalized.taskDelay[i] - self.Base.taskDelay[i]
+        return Normalized
+            
+
 
 class WaypointHistory(object):
     def __init__(self):
@@ -531,7 +579,7 @@ class RadioMap(object):
 
 
 class Node(object):#Interdependent PredictiveTree Class, can exist without one, but its hopelessly lost  :(
-    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator,decisionStack:list,penalty:TaskPenaltyTracker):#this contructor is getting to long.... >:(
+    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator,decisionStack:list,penalty:TaskPenaltyTracker,confidence:float):#this contructor is getting to long.... >:(
         self.q_memo = dict()
         self.id_memo = dict()
         self.wph_memo = dict()
@@ -549,6 +597,7 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         self.Connected = connected
         self.DecisionStack = copy.deepcopy(decisionStack,self.ds_memo)
         self.PenaltyTracker = penalty.__deepcopy__(self.pt_memo)
+        self.Confidence = confidence
 
 
 
@@ -623,6 +672,45 @@ class TaskHold(object):
         self.Captives = []
         self.Reasons = []
 
+class HaltSolution(object):
+    def __init__(self,optionNum,branch,confidence,distance,penaltyTracker, decisions):
+        self.OptionNum = optionNum
+        self.Branch = branch
+        self.Confidence = confidence # ?/100%
+        self.TotalDistance = distance # meters
+        self.Penalties = penaltyTracker # seconds
+        self.DecisionStack = decisions
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
+class HaltSolutionAnalyzer(object):
+    def __init__(self, solutions:list):
+        x=0
+        self.Solutions = solutions
+        
+    def Recommend(self,priority):
+        bestSolution:HaltSolution = self.Solutions[0]
+        for sol in self.Solutions:
+            if(priority == "DISTANCE"):
+                if(sol.TotalDistance<bestSolution.TotalDistance):
+                    bestSolution = sol
+            if(priority == "CONFIDENCE"):
+                if(sol.Confidence>bestSolution.Confidence):
+                    bestSolution = sol
+            if(priority == "TOTAL_DELAY"):
+                if(sol.Penalties.TotalDelay()<bestSolution.Penalties.TotalDelay()):
+                    bestSolution = sol
+        print("Based on "+ priority + " option #" + str(bestSolution.OptionNum) + "is the optimal solution")
+        return bestSolution
+
+        
+
 
 
 # class StateContainer(object):
@@ -647,11 +735,15 @@ class PredictiveTree(object):
         self.RadioPosition.InitParams(self.radio['lon'], self.radio['lat'],0,0,0,0)
         self.BranchEnds = list()
         self.BranchNodes = list()
+        memo = dict()
+        self.UnmodifiedTaskQ = self.Root.Q.__deepcopy__(memo)
+        self.Priority = "DISTANCE"
+        self.Solutions = list()
         
         self.Root.Parent = -1
         #self.Root.ID = self.ID_Gen.Get()
         r = self.Root
-        self.NewNode(r.Q,r.LeadingTask,r.Finish,r.Connected,r.TravelHistory,r.ID_GEN,r.DecisionStack,r.PenaltyTracker)
+        self.NewNode(r.Q,r.LeadingTask,r.Finish,r.Connected,r.TravelHistory,r.ID_GEN,r.DecisionStack,r.PenaltyTracker,1.0)
         self.Status.Update(r.LeadingTask.position,r.Connected)
 
     def PrintNodes(self):
@@ -673,7 +765,7 @@ class PredictiveTree(object):
 
 
 
-    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory,id_gen:TaskIDGenerator,ds:list,pt:TaskPenaltyTracker):#deines a new node and adds it to the list of nodes
+    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory,id_gen:TaskIDGenerator,ds:list,pt:TaskPenaltyTracker,con:float):#deines a new node and adds it to the list of nodes
 
         memo_id = dict()
 
@@ -686,7 +778,7 @@ class PredictiveTree(object):
 
         if(t.task=="FLIGHT"):
             prevWaypointHistory.AddPoint(t.position,connected)
-        newNode = Node(id,taskQ,t,finish,connected,prevWaypointHistory,id_gen_cpy,ds,pt)
+        newNode = Node(id,taskQ,t,finish,connected,prevWaypointHistory,id_gen_cpy,ds,pt,con)
         self.Nodes.append(newNode)
         self.NodeMap[newNode.ID] = newNode
         
@@ -725,8 +817,12 @@ class PredictiveTree(object):
         
 
     def BranchAnalyze(self):
+        now = datetime.now()
+        current_timestring = now.strftime("%Y%m%d-%H%M%S")
         branches = 0
-        
+        penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
+        self.Solutions= list()
+        memo_sol = dict()
         for i, n in enumerate(self.Nodes):
             if(not (n.Children.__len__())):
                 branches = branches + 1
@@ -734,16 +830,24 @@ class PredictiveTree(object):
                 self.BranchNodes.append(n)
         print("Branches: "  + str(self.BranchEnds))
         for i, n in enumerate(self.BranchNodes):
-            print("")
-            print("Branch ID: "+ str(n.ID))
-            print("DECISIONS: "+ str(n.DecisionStack))
-            print("Branch: "+ str(n.ID))
-            n.PenaltyTracker.Print()
-            print("")
             branch = self.GetFullBranch(n)
             d = self.GetBranchDistance(branch)
+            c = self.GetBranchConfidence(branch) 
+            print("")
+            print("Option#: "+ str(i))
             print("Distance: "+str(d)+" m")
-            print("********************************")        
+            print("Confidence: "+str(c)+" %")
+            print("Decisions: "+ str(n.DecisionStack))
+            print("")
+            print("CONNECTION DEPENDENT TASK PENALTIES (s)")
+            print("======================================")
+            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker).Print()
+            print("********************************************************************************")
+            solution = HaltSolution(i,self.BranchEnds[i],c,d,p_norm,n.DecisionStack)
+            self.Solutions.append(solution.__deepcopy__(memo_sol))
+            JSON_DUMP_TASK = jsonpickle.encode(self.Solutions)
+            with open('solutions'+current_timestring +'.txt','w') as f:
+                f.write(JSON_DUMP_TASK)
 
 
     def GetBranchDistance(self,branch:list):
@@ -759,6 +863,11 @@ class PredictiveTree(object):
         return distance
 
             
+    def GetBranchConfidence(self,branch:list):
+        confidence = 1.0
+        for i, n in enumerate(branch):
+                confidence = confidence * n.Confidence
+        return confidence*100.0
             
 
         
@@ -829,8 +938,10 @@ class PredictiveTree(object):
         Q.AppendTasks(taskConversion)
 
 
-        n = self.NewNode(Q,t,False,False,wph,node.ID_GEN,node.DecisionStack,node.PenaltyTracker)
-        n.PenaltyTracker.AddTask(nextTask.uniqueID)
+        n = self.NewNode(Q,t,False,False,wph,node.ID_GEN,node.DecisionStack,node.PenaltyTracker,1.0)
+        n.DecisionStack.append("BLOCK")
+        # n.DecisionStack.append("Task: "+str(nextTask.uniqueID)+"~BLOCK")
+        #n.PenaltyTracker.AddTask(nextTask.uniqueID)
         return n
         
 
@@ -860,42 +971,56 @@ class PredictiveTree(object):
 
     def Continue(self,nextNode:Node):
         memo_q = dict()
+        memo_n = dict()
         Q = nextNode.Q.__deepcopy__(memo_q)
         currentNode:Node = nextNode
         currentPosition = self.Status.Position
-        self.Status.Update(currentNode.LeadingTask.position,currentNode.Connected)
+        LeadingTask = currentNode.LeadingTask
+        
         
         
 
 
         while(not Q.Empty()):
-            self.CheckHold(Q)
-            t:Task = Q.PopTask()
-            previousPosition = currentPosition
-            currentPosition = t.position
+
+
+            self.Status.Update(currentNode.LeadingTask.position,currentNode.Connected)
+            previousLeadingTask = LeadingTask
+            #t:Task = Q.PopTask()
 
 
 
             #this ~if~ block seems redundant and wrong?
-            if(self.ActionableTask(t,self.Status.Connected)):#Can we changes this to 100% Certainity only? THIS BLOCK ASSUMES task `t` has ~100%
+            if(self.ActionableTask(Q.Peek(),self.Status.Connected)):#Can we changes this to 100% Certainity only? THIS BLOCK ASSUMES task `t` has ~100%
+                t:Task = Q.PopTask()
+                previousPosition = currentPosition
+                currentPosition = t.position
                 nextLocationConnected = self.ConnectionThreshold(t.position,1.00)
+                if(nextLocationConnected):
+                    self.CheckHold(Q)   
                 finish = Q.Empty()
-                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker)
+                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0)
+                LeadingTask = t
                 n.PenaltyTracker.Penalize(t,previousPosition)
                 currentNode.Adopt(n)
                 currentNode = n
                 # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
                 #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
-                probabilty = self.ConnectionProbabilty(t.position)
+                probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 finish = Q.Empty()
-                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker)
-                n.DecisionStack.append("LOF")#Leap of faith! P/F
-                currentNode.Adopt(n)
+                n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
+                n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
+                n_P.DecisionStack.append("LOF")#Leap of faith! P/F
+                n_F.DecisionStack.append("LOF")#Leap of faith! P/F
+                # n_P.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
+                # n_F.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
+                currentNode.Adopt(n_P)
+                currentNode.Adopt(n_F)
                 currentNode = n
                 if(probabilty>0.01):
-                    self.Continue(currentNode) #assumes success 
-                    self.HaltPoint(currentNode) #assumes failure ******needs a node with q still holding the
+                    self.Continue(n_P) #these should be the same except for probabilty
+                    self.HaltPoint(n_F)#these should be the same
                 break
         return currentNode
 
@@ -906,13 +1031,13 @@ class PredictiveTree(object):
             return
         else:
             BlockTreeHalt = self.Block(HaltNode)
-            print('BLOCK-ADOPTED')
+            #print('BLOCK-ADOPTED')
 
             self.HaltPoint(BlockTreeHalt)
 
 
             HoldTreeHalt = self.Hold(HaltNode)
-            print('HOLD-ADOPTED')
+            #print('HOLD-ADOPTED')
 
             self.HaltPoint(HoldTreeHalt)
 
@@ -920,7 +1045,6 @@ class PredictiveTree(object):
 
     def Block(self,HaltNode:Node):
         nextNode = self.BackStep(HaltNode)
-        nextNode.DecisionStack.append("BLOCK")
         HaltNode.Adopt(nextNode)
         return self.Continue(nextNode)
 
@@ -940,10 +1064,11 @@ class PredictiveTree(object):
 
 
             t:Task = Q.PopTask()
-            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker)
-            n.DecisionStack.append("HOLD")
+            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker,1.0)
             for n_held in nodesHeld:
-                n.PenaltyTracker.AddTask(n_held.uniqueID)
+                #n.PenaltyTracker.AddTask(n_held.uniqueID)
+                n.DecisionStack.append("HOLD")
+                # n.DecisionStack.append("Task: "+str(n_held.uniqueID)+"~HOLD")
             HaltNode.Adopt(n)
             return self.Continue(n)
         else:
