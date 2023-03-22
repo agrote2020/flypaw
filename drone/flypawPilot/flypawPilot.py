@@ -1025,8 +1025,19 @@ class FlyPawPilot(StateMachine):
 
         #this may need a state of its own... reestablish connection
         if(self.communications['iperf']==0 and nextTask.comms_required):
+
             JSON_DUMP = jsonpickle.encode(self.taskQ)
             JSON_DUMP_WPH = jsonpickle.encode(self.WaypointHistory)
+            emptyList = list()
+            t = self.taskQ.NextTask()
+            pt = TaskPenaltyTracker(self.taskQ)
+            root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
+            tree:PredictiveTree = PredictiveTree(root)
+            tree.HaltPoint(False)
+            #tree.PrintNodes()
+            tree.BranchAnalyze()
+
+
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)
             with open('json_dump_wph.txt','w') as f:
