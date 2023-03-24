@@ -36,7 +36,7 @@ from aerpawlib.vehicle import Vehicle
 from aerpawlib.vehicle import Drone
 
 sys.path.append('/root/agrote/flypaw/basestation/basestationAgent')
-from flypawClasses import resourceInfo, missionInfo, Position, Battery, RadioMap,TaskQueue,Task, MissionObjective, WaypointHistory, TaskIDGenerator
+from flypawClasses import *
 #import flypawClasses
 
 

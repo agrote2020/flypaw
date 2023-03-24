@@ -13,8 +13,8 @@ import os
 import sys
 script_dir = os.path.dirname( 'flypawClasses.py' )
 mymodule_dir = os.path.join( script_dir, '..','..','basestation', 'basestationAgent' )
-#sys.path.append( 'C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
-sys.path.append( 'C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
+sys.path.append( 'C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
+#sys.path.append( 'C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
 
 from flypawClasses import *
 
@@ -30,17 +30,17 @@ tq.Count = 1
 
 # #print(stringJ)
 #with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f: #~~~~~~~~~~~~~for desktop~~~~~~~~~~~
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt",'r') as f: #for laptop
+with open("C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt",'r') as f: #for laptop
     tq = jsonpickle.decode(f.read())
     tq.TaskLock.__RESET__()
 
 
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
+with open("C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
     wph:WaypointHistory = jsonpickle.decode(f.read())
 
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_t.txt",'r') as f: #for laptop
+with open("C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_t.txt",'r') as f: #for laptop
     t = jsonpickle.decode(f.read())
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_id.txt",'r') as f: #for laptop
+with open("C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_id.txt",'r') as f: #for laptop
     id:TaskIDGenerator = jsonpickle.decode(f.read())
 
 #print(tq)

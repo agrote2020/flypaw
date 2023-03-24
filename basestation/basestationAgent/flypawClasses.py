@@ -867,6 +867,7 @@ class PredictiveTree(object):
         confidence = 1.0
         for i, n in enumerate(branch):
                 confidence = confidence * n.Confidence
+                #print("CON: "+str(i)+"---"+str(n.Confidence))
         return confidence*100.0
             
 
@@ -996,6 +997,7 @@ class PredictiveTree(object):
                 previousPosition = currentPosition
                 currentPosition = t.position
                 nextLocationConnected = self.ConnectionThreshold(t.position,1.00)
+                probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 if(nextLocationConnected):
                     self.CheckHold(Q)   
                 finish = Q.Empty()
