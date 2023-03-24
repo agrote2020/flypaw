@@ -997,10 +997,13 @@ class PredictiveTree(object):
                 previousPosition = currentPosition
                 currentPosition = t.position
                 nextLocationConnected = self.ConnectionThreshold(t.position,1.00)
-                probabilty = self.ConnectionProbabilty(Q.Peek().position)
+                finish = Q.Empty()
+                if(not finish):
+                    probabilty = self.ConnectionProbabilty(Q.Peek().position)
+
                 if(nextLocationConnected):
                     self.CheckHold(Q)   
-                finish = Q.Empty()
+
                 n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0)
                 LeadingTask = t
                 n.PenaltyTracker.Penalize(t,previousPosition)
