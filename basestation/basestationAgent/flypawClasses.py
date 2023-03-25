@@ -390,7 +390,7 @@ class TaskQueue(object):
         x=0
         taskList = list()
     
-        for t in self.TaskQueue:
+        for t in self.queue:
             if(t.comms_required):
                 taskList.append(t)
 
