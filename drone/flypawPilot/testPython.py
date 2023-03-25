@@ -11,10 +11,14 @@ from geographiclib.geodesic import Geodesic
 import importlib
 import os
 import sys
-script_dir = os.path.dirname( 'flypawClasses.py' )
-mymodule_dir = os.path.join( script_dir, '..','..','basestation', 'basestationAgent' )
-#sys.path.append( 'C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
-sys.path.append( 'C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\basestation\\basestationAgent' )
+
+thisFileDir = os.path.realpath(os.path.dirname(__file__))
+flypawRootDir = os.path.realpath(os.path.join(thisFileDir , '..', '..'))
+flypawClassDir = os.path.realpath(os.path.join(flypawRootDir, 'basestation','basestationAgent'))
+
+#Append the directory that contains the flypawClass.py file
+sys.path.append(flypawClassDir)
+
 
 from flypawClasses import *
 
@@ -27,20 +31,21 @@ tq.Count = 1
 
 # #print(json.dumps(tq.__dict__))
 
-
-# #print(stringJ)
-#with open('C:\\Users\\Andrew\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt','r') as f: #~~~~~~~~~~~~~for desktop~~~~~~~~~~~
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_q.txt",'r') as f: #for laptop
+dump_q_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','json_dump_q.txt'))
+with open(dump_q_path,'r') as f:
     tq = jsonpickle.decode(f.read())
     tq.TaskLock.__RESET__()
 
-
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_wph.txt",'r') as f: #for laptop
+dump_wph_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','json_dump_wph.txt'))
+with open(dump_wph_path,'r') as f:
     wph:WaypointHistory = jsonpickle.decode(f.read())
 
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_t.txt",'r') as f: #for laptop
+dump_t_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','json_dump_t.txt'))
+with open(dump_t_path,'r') as f:
     t = jsonpickle.decode(f.read())
-with open("C:\\Users\\andgr\\OneDrive\\Documents\\delmont\\flypaw\\drone\\flypawPilot\\json_dump_id.txt",'r') as f: #for laptop
+
+dump_id_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','json_dump_id.txt'))
+with open(dump_id_path,'r') as f:
     id:TaskIDGenerator = jsonpickle.decode(f.read())
 
 #print(tq)
