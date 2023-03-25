@@ -282,7 +282,7 @@ class WatchDog(object):
     def StartStopwatches(self):
         if(not self.StartedStopwatches):
             for sw in self.Stopwatches:
-                self.Stopwatches.Get(sw).StartWatch()
+                self.Stopwatches.get(sw).StartWatch()
             self.StartedStopwatches = True 
             self.WatchdogStartStamp = time.time()
         else:
