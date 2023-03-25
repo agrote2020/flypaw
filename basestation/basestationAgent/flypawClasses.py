@@ -5,7 +5,7 @@ from pickle import FALSE
 from queue import Empty
 from geographiclib.geodesic import Geodesic
 import jsonpickle
-from datetime import datetime
+from datetime import *
 
 
 class Position(object):
@@ -225,6 +225,37 @@ class IDGenerator(object):
     def Check(self):
         return self
     
+class TaskStopwatch(object):
+    def __init__(self,t:Task):
+        self.StartTime = time()
+        self.EndTime = time()
+        self.Task = t
+        self.Started = False
+        self.Stopped = False
+        
+
+    def StartWatch(self):
+        if(not self.Started):
+            self.StartTime = time.time()
+        else:
+            x=0
+            #throw Exception
+    
+
+    def StopWatch(self):
+        if((not self.Stopped) and self.Started):
+            self.StopTime = time.time()
+        else:
+            x=0
+            #throw Exception
+
+    def GetTime(self):
+        if((self.Stopped) and self.Started):
+            return self.EndTime-self.StartTime
+        else:
+            x=0
+
+
 
 class TaskQueue(object):
 
@@ -629,6 +660,13 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
 
     def ChildrenCount(self):
         return self.Children.count
+    
+    def GetLastDecision(self):
+        x= 0
+        if(self.DecisionStack.__len__()>0):
+            return None
+        else:
+            return self.DecisionStack[self.DecisionStack.__len__()]
 
 
 
