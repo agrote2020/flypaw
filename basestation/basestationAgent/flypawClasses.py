@@ -275,7 +275,8 @@ class WatchDog(object):
     def InitStopwatches(self,criticalTasks:list):
         x=0
         for t in criticalTasks:
-            self.Stopwatches[t.uniqueID]=(TaskStopwatch(t))
+            sw:TaskStopwatch = TaskStopwatch(t)
+            self.Stopwatches[t.uniqueID]=sw
         self.InitializedStopwatches = True
         
     def StartStopwatches(self):
