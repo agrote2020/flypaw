@@ -23,13 +23,7 @@ sys.path.append(flypawClassDir)
 from flypawClasses import *
 
 
-tq:TaskQueue = TaskQueue()
-tq.Count = 1
-# #stringJ = tq.to_json()
-# jsonobj = jsonpickle.encode(tq)
-# print(jsonobj)
 
-# #print(json.dumps(tq.__dict__))
 
 dump_q_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','json_dump_q.txt'))
 with open(dump_q_path,'r') as f:
@@ -48,11 +42,6 @@ dump_id_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot
 with open(dump_id_path,'r') as f:
     id:TaskIDGenerator = jsonpickle.decode(f.read())
 
-#print(tq)
-print('count:' + str(tq.Count))
-print('count:' + str(wph.Count))
-print("CURRENT " + str(id.CurrentTaskID))
-#tq.PrintQ()
 
 t = tq.NextTask()
 pt = TaskPenaltyTracker(tq)
