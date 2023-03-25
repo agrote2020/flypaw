@@ -75,6 +75,7 @@ class FlyPawPilot(StateMachine):
         self.RADIO_RADIUS_SIM = 270 # meters
         self.WaypointHistory = WaypointHistory()
         self.CriticalTaskTimers = list()
+        self.WatchDog =WatchDog()
         
 
 
@@ -256,6 +257,10 @@ class FlyPawPilot(StateMachine):
         #ok, try to accept mission
         print("accepting mission")
         missionAccepted = acceptMission(self.currentPosition,self.basestationIP, self.missions[0])
+
+        self.InitWatchdog()
+        self.ActivateWatchDog()
+
         if missionAccepted:
             print ("Here it is"+  str(self.missions[0].Type) + " mission accepted")
             
@@ -470,7 +475,7 @@ class FlyPawPilot(StateMachine):
         #drone.set_heading(bearing_from_here)
         
         await drone.goto_coordinates(defaultNextCoord)
-        self.ActionStatus = "SUCCESS"
+        self.WatchDog.ActionComplete(self.CurrentTask)
         return "waypoint_entry" 
 
     @timed_state(name="instructionRequest", duration=1)
@@ -598,6 +603,7 @@ class FlyPawPilot(StateMachine):
         logState(self.logfiles['state'], "collectVideo")
         x=0
         time.sleep(4)
+        self.WatchDog.ActionComplete(self.CurrentTask)
         return "waypoint_entry"
 
         
@@ -669,6 +675,7 @@ class FlyPawPilot(StateMachine):
                 print(serverReply['uuid_received'])
                 if serverReply['uuid_received'] == str(x):
                     print(serverReply['type_received'] + " receipt confirmed by UUID")
+                    self.WatchDog.ActionComplete(self.CurrentTask)
         return "waypoint_entry"
     
     @state(name="sendVideo")
@@ -756,6 +763,7 @@ class FlyPawPilot(StateMachine):
         post flight cleanup
         """
         self.WaypointHistory.PrintWorkingHistory()
+        self.WatchDog.Print()
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
         x = uuid.uuid4()
@@ -808,17 +816,15 @@ class FlyPawPilot(StateMachine):
             print("CONNECTION-BAD!")
             #BENCHMARK
         
-    def InitWatchdog(self):
-        x=0
+    def InitWatchDog(self):
+
         critTasks = self.taskQ.GetCriticalTasks()
-        for t in critTasks:
-            self.CriticalTaskTimers.append
+        self.WatchDog.InitStopwatches(critTasks)
 
 
+    def ActivateWatchDog(self):
 
-        x=0
-
-
+        self.WatchDog.StartStopwatches()
 
 
 

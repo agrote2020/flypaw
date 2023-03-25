@@ -226,6 +226,8 @@ class IDGenerator(object):
     def Check(self):
         return self
     
+
+
 class TaskStopwatch(object):
     def __init__(self,t:Task):
         self.StartTime = None
@@ -257,6 +259,55 @@ class TaskStopwatch(object):
             return self.EndTime-self.StartTime
         else:
             x=0
+
+class WatchDog(object):
+    def __init__(self):
+        self.Stopwatches = dict()
+        self.Actions = dict()#tasks
+        self.ActionTimeStamps = dict()#timestamp completed
+        self.OrderofExecution = dict()
+        self.keys = list()
+        self.InitializedStopwatches = False
+        self.StartedStopwatches = False
+        self.WatchdogStartStamp = None
+        self.ExecutionOrderGenerator = IDGenerator()
+
+    def InitStopwatches(self,criticalTasks:list):
+        x=0
+        for t in criticalTasks:
+            self.Stopwatches[t.uniqueID]=(TaskStopwatch(t))
+        self.InitializedStopwatches = True
+        
+    def StartStopwatches(self):
+        if(not self.StartedStopwatches):
+            for sw in self.Stopwatches:
+                sw.StartWatch()
+            self.StartedStopwatches = True 
+            self.WatchdogStartStamp = time.time()
+        else:
+            x=0#throw exception
+
+    def ActionComplete(self,task:Task):
+        if(not self.Actions.get(task.uniqueID)):
+            self.Actions[task.uniqueID] = task
+            self.ActionTimeStamps[task.uniqueID] = time.time()
+            self.CheckStopwatches(task.uniqueID)
+            self.keys.append(task.uniqueID)
+            self.OrderofExecution[task.uniqueID] = self.ExecutionOrderGenerator.Get()
+        else:
+            print("Watchdog Error: Action Completed Twice Exist!")
+
+    def CheckStopwatches(self,id):
+        if(not self.Stopwatches.get(id)):
+            #error
+            x=0
+        else:
+            self.Stopwatches.get(id).StopWatch()
+
+    def Print(self):
+        for k in self.keys:
+            print("Task ID: "+ str(k)+ " Action: "+ str(self.Actions.get(k).task))
+        
 
 
 
