@@ -6,6 +6,7 @@ from queue import Empty
 from geographiclib.geodesic import Geodesic
 import jsonpickle
 from datetime import *
+import time
 
 
 class Position(object):
@@ -227,8 +228,8 @@ class IDGenerator(object):
     
 class TaskStopwatch(object):
     def __init__(self,t:Task):
-        self.StartTime = time()
-        self.EndTime = time()
+        self.StartTime = None
+        self.EndTime = None
         self.Task = t
         self.Started = False
         self.Stopped = False
@@ -237,6 +238,7 @@ class TaskStopwatch(object):
     def StartWatch(self):
         if(not self.Started):
             self.StartTime = time.time()
+            self.Started = True
         else:
             x=0
             #throw Exception
@@ -244,7 +246,8 @@ class TaskStopwatch(object):
 
     def StopWatch(self):
         if((not self.Stopped) and self.Started):
-            self.StopTime = time.time()
+            self.EndTime = time.time()
+            self.Stopped = True
         else:
             x=0
             #throw Exception
