@@ -389,7 +389,6 @@ class TaskQueue(object):
     def GetCriticalTasks(self):
         x=0
         taskList = list()
-        t:Task = Task()
     
         for t in self.TaskQueue:
             if(t.comms_required):
