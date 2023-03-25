@@ -258,7 +258,7 @@ class FlyPawPilot(StateMachine):
         print("accepting mission")
         missionAccepted = acceptMission(self.currentPosition,self.basestationIP, self.missions[0])
 
-        self.InitWatchdog()
+        self.InitWatchDog()
         self.ActivateWatchDog()
 
         if missionAccepted:
