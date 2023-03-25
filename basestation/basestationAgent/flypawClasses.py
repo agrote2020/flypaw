@@ -335,6 +335,19 @@ class TaskQueue(object):
         task = self.TaskLock.ReleaseTask()
         self.AppendTask(task)
 
+    def GetCriticalTasks(self):
+        x=0
+        taskList = list()
+        t:Task = Task()
+    
+        for t in self.TaskQueue:
+            if(t.comms_required):
+                taskList.append(t)
+
+        return taskList
+    
+
+
 
 
     def __deepcopy__(self, memo):

@@ -74,6 +74,7 @@ class FlyPawPilot(StateMachine):
         self.Drone = None
         self.RADIO_RADIUS_SIM = 270 # meters
         self.WaypointHistory = WaypointHistory()
+        self.CriticalTaskTimers = list()
         
 
 
@@ -807,7 +808,15 @@ class FlyPawPilot(StateMachine):
             print("CONNECTION-BAD!")
             #BENCHMARK
         
+    def InitWatchdog(self):
+        x=0
+        critTasks = self.taskQ.GetCriticalTasks()
+        for t in critTasks:
+            self.CriticalTaskTimers.append
 
+
+
+        x=0
 
 
 
@@ -1275,6 +1284,8 @@ class FlyPawPilot(StateMachine):
         return 0
 
     
+
+
 def getMissions(pos, basestationIP):
     x = uuid.uuid4()
     msg = {}
