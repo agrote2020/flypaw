@@ -53,7 +53,7 @@ print('count:' + str(tq.Count))
 print('count:' + str(wph.Count))
 print("CURRENT " + str(id.CurrentTaskID))
 #tq.PrintQ()
-"""
+
 t = tq.NextTask()
 pt = TaskPenaltyTracker(tq)
 norm = TaskPenaltyNormalizer(tq)
@@ -68,13 +68,13 @@ tree.BranchAnalyze()
 
 
 
-"""
 
-sw = TaskStopwatch(tq.NextTask())
+
+""" sw = TaskStopwatch(tq.NextTask())
 sw.StartWatch()
 time.sleep(3.5)
 sw.StopWatch()
-print("time: "+str(sw.GetTime()))
+print("time: "+str(sw.GetTime())) """
 
 #tree.BranchDistances()
 #tree.DELAY_PRINT_TEST()
