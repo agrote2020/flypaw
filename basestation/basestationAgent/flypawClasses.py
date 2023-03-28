@@ -271,6 +271,7 @@ class WatchDog(object):
         self.StartedStopwatches = False
         self.WatchdogStartStamp = None
         self.ExecutionOrderGenerator = IDGenerator()
+        self.Normal:TaskPenaltyNormalizer = None
 
     def InitStopwatches(self,criticalTasks:list):
         x=0
@@ -308,7 +309,33 @@ class WatchDog(object):
     def Print(self):
         for k in self.keys:
             print("Task ID: "+ str(k)+ " Action: "+ str(self.Actions.get(k).task))
+
+    def DumpReport(self):
+        records = list()
+        lastTime = 0
+        for k in self.keys:
+            t:Task = self.Actions.get(k)
+            d_time = self.ActionTimeStamps.get(k)-lastTime
+            lastTime = self.ActionTimeStamps.get(k)
+            penalty = 0
+            if(t.comms_required):
+                penalty = lastTime = self.ActionTimeStamps.get(k) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+            rec = ActionRecord(d_time,t.task,t.position,penalty)
+            records.append(rec)
+        JSON_DUMP_LIST = jsonpickle.encode(records)
+        with open('ActionRecord.json','w') as f:
+            f.write(JSON_DUMP_LIST)
         
+            
+
+        
+class ActionRecord(object):
+    def __init__(self, tte,t:Task,pos:Position,penalty):
+        self.TimeToExecute = 0
+        self.Task = ""
+        self.Position = Position()
+        self.Penalty = 0
+
 
 
 

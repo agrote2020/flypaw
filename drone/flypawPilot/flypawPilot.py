@@ -76,6 +76,7 @@ class FlyPawPilot(StateMachine):
         self.WaypointHistory = WaypointHistory()
         self.CriticalTaskTimers = list()
         self.WatchDog =WatchDog()
+
         
 
 
@@ -190,6 +191,7 @@ class FlyPawPilot(StateMachine):
         else:
             print("number of missions: " + str(len(self.missions)))
             self.processMissions()
+            self.WatchDog.Normal = TaskPenaltyNormalizer(self.taskQ)
             self.taskQ.PrintQ()
             
 
@@ -764,6 +766,7 @@ class FlyPawPilot(StateMachine):
         """
         self.WaypointHistory.PrintWorkingHistory()
         self.WatchDog.Print()
+        self.WatchDog.DumpReport()
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
         x = uuid.uuid4()
