@@ -767,6 +767,9 @@ class FlyPawPilot(StateMachine):
         self.WaypointHistory.PrintWorkingHistory()
         self.WatchDog.Print()
         self.WatchDog.DumpReport()
+        JSON_DUMP_WD = jsonpickle.encode(self.WatchDog)
+        with open('dump_watchdog.json','w') as f:
+            f.write(JSON_DUMP_WD)
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
         x = uuid.uuid4()
