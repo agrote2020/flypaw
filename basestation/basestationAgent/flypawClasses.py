@@ -320,7 +320,7 @@ class WatchDog(object):
             penalty = 0
             if(t.comms_required):
                 penalty = lastTime = self.ActionTimeStamps.get(k) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
-            rec = ActionRecord(d_time,t.task,t.position,penalty)
+            rec = ActionRecord(d_time,t.task,t.position,penalty,"","")
             records.append(rec)
         JSON_DUMP_LIST = jsonpickle.encode(records)
         with open('ActionRecord.json','w') as f:
@@ -330,11 +330,37 @@ class WatchDog(object):
 
         
 class ActionRecord(object):
-    def __init__(self, tte,t:Task,pos:Position,penalty):
+    def __init__(self, tte,t:Task,pos:Position,penalty,decision,confidence):
         self.TimeToExecute = 0
         self.Task = ""
         self.Position = Position()
-        self.Penalty = 0
+        self.Penalty = penalty
+        self.Decision = decision
+        self.Confidence = confidence
+
+class Solution(object):
+    def __init__(self):
+        self.TimeStamp = time()
+        self.HaltTask = Task()
+        self.Priority = ""
+        self.Distance = 0
+        self.Record = list() #of action record
+        self.Confidence = 100.0
+        self.DecisionStack = list()#of decisions
+
+class SpeculativeProduct(object):
+    def __init__(self):
+        self.Solutions  = list()
+        self.ElectedSolution = 0 #soln. number
+        self.Priority = ""
+
+
+class ExperimentResults(object):
+    def __init__(self):
+        self.SpeculativeSolutionSets  = list()
+        self.ExecutionRecord = 0 #soln. number
+
+
 
 
 
