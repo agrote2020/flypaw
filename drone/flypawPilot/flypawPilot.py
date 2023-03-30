@@ -775,6 +775,9 @@ class FlyPawPilot(StateMachine):
         experiment = ExperimentResults()
         experiment.SpeculativeSolutionSets = self.SpeculationList
         experiment.ExecutionRecord = self.WatchDog.GetActionList()
+        JSON_DUMP_EEE = jsonpickle.encode(experiment)
+        with open('EXPERIMENT_DUMP.json','w') as f:
+            f.write(JSON_DUMP_EEE)
 
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
