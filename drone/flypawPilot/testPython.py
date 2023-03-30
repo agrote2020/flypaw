@@ -42,8 +42,12 @@ dump_id_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot
 with open(dump_id_path,'r') as f:
     id:TaskIDGenerator = jsonpickle.decode(f.read())
 
+dump_id_path = os.path.realpath(os.path.join(flypawRootDir, 'drone','flypawPilot','dump_watchdog.json'))
+with open(dump_id_path,'r') as f:
+    wd:WatchDog = jsonpickle.decode(f.read())
 
 t = tq.NextTask()
+wd.DumpReport()
 pt = TaskPenaltyTracker(tq)
 norm = TaskPenaltyNormalizer(tq)
 emptyList = list()

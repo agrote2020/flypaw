@@ -314,12 +314,12 @@ class WatchDog(object):
         records = list()
         lastTime = 0
         for k in self.keys:
-            t:Task = self.Actions.get(k)
-            d_time = self.ActionTimeStamps.get(k)-lastTime
-            lastTime = self.ActionTimeStamps.get(k)
+            t:Task = self.Actions.get(str(k))
+            d_time = self.ActionTimeStamps.get(str(k))-lastTime
+            lastTime = self.ActionTimeStamps.get(str(k))
             penalty = 0
             if(t.comms_required):
-                penalty = lastTime = self.ActionTimeStamps.get(k) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+                penalty = lastTime = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
             rec = ActionRecord(d_time,t.task,t.position,penalty,"","")
             records.append(rec)
         JSON_DUMP_LIST = jsonpickle.encode(records)

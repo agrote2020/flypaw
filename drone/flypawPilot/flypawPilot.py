@@ -677,7 +677,8 @@ class FlyPawPilot(StateMachine):
                 print(serverReply['uuid_received'])
                 if serverReply['uuid_received'] == str(x):
                     print(serverReply['type_received'] + " receipt confirmed by UUID")
-                    self.WatchDog.ActionComplete(self.CurrentTask)
+
+        self.WatchDog.ActionComplete(self.CurrentTask)
         return "waypoint_entry"
     
     @state(name="sendVideo")
