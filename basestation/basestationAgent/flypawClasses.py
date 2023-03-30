@@ -1007,6 +1007,36 @@ class PredictiveTree(object):
             with open('solutions'+current_timestring +'.txt','w') as f:
                 f.write(JSON_DUMP_TASK)
 
+    def BuildSolutionObject(self):
+        now = datetime.now()
+        current_timestring = now.strftime("%Y%m%d-%H%M%S")
+        branches = 0
+        penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
+        self.Solutions= list()
+        memo_sol = dict()
+        for i, n in enumerate(self.Nodes):
+            if(not (n.Children.__len__())):
+                branches = branches + 1
+                self.BranchEnds.append(n.ID)
+                self.BranchNodes.append(n)
+        print("Branches: "  + str(self.BranchEnds))
+        for i, n in enumerate(self.BranchNodes):
+            branch = self.GetFullBranch(n)
+            d = self.GetBranchDistance(branch)
+            c = self.GetBranchConfidence(branch) 
+            print("")
+            print("Option#: "+ str(i))
+            print("Distance: "+str(d)+" m")
+            print("Confidence: "+str(c)+" %")
+            print("Decisions: "+ str(n.DecisionStack))
+            print("")
+            print("CONNECTION DEPENDENT TASK PENALTIES (s)")
+            print("======================================")
+            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker).Print()
+            print("********************************************************************************")
+            solution = HaltSolution(i,self.BranchEnds[i],c,d,p_norm,n.DecisionStack)
+            self.Solutions.append(solution.__deepcopy__(memo_sol))
+
 
     def GetBranchDistance(self,branch:list):
         x=0

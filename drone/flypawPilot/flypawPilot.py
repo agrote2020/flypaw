@@ -76,6 +76,7 @@ class FlyPawPilot(StateMachine):
         self.WaypointHistory = WaypointHistory()
         self.CriticalTaskTimers = list()
         self.WatchDog =WatchDog()
+        self.SpeculationList = list()
 
         
 
@@ -767,10 +768,11 @@ class FlyPawPilot(StateMachine):
         """
         self.WaypointHistory.PrintWorkingHistory()
         self.WatchDog.Print()
-        self.WatchDog.DumpReport()
         JSON_DUMP_WD = jsonpickle.encode(self.WatchDog)
         with open('dump_watchdog.json','w') as f:
             f.write(JSON_DUMP_WD)
+        self.WatchDog.DumpReport()
+
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
         x = uuid.uuid4()
@@ -1052,6 +1054,7 @@ class FlyPawPilot(StateMachine):
             JSON_DUMP_WPH = jsonpickle.encode(self.WaypointHistory)
             emptyList = list()
             t = self.taskQ.NextTask()
+            speculation =  SpeculativeProduct()
             pt = TaskPenaltyTracker(self.taskQ)
             root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
             tree:PredictiveTree = PredictiveTree(root)
