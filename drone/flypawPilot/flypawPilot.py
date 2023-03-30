@@ -772,6 +772,9 @@ class FlyPawPilot(StateMachine):
         with open('dump_watchdog.json','w') as f:
             f.write(JSON_DUMP_WD)
         self.WatchDog.DumpReport()
+        experiment = ExperimentResults()
+        experiment.SpeculativeSolutionSets = self.SpeculationList
+        experiment.ExecutionRecord = self.WatchDog.GetActionList()
 
         print("cleaning up")
         logState(self.logfiles['state'], "completed")
@@ -1060,8 +1063,7 @@ class FlyPawPilot(StateMachine):
             tree:PredictiveTree = PredictiveTree(root)
             tree.HaltPoint(False)
             #tree.PrintNodes()
-            tree.BranchAnalyze()
-
+            speculation.Solutions.append(tree.BuildSolutionObject())
 
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)

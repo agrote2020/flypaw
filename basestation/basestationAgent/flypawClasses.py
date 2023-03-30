@@ -319,20 +319,23 @@ class WatchDog(object):
             lastTime = self.ActionTimeStamps.get(str(k))
             penalty = 0
             if(t.comms_required):
-                penalty = lastTime = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
-            rec = ActionRecord(d_time,t.task,t.position,penalty,"","")
+                penalty = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+            rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
             records.append(rec)
         JSON_DUMP_LIST = jsonpickle.encode(records)
         with open('ActionRecord.json','w') as f:
             f.write(JSON_DUMP_LIST)
+
+    def GetActionList(self):
+        x=0
         
             
 
         
 class ActionRecord(object):
     def __init__(self, tte,t:Task,pos:Position,penalty,decision,confidence):
-        self.TimeToExecute = 0
-        self.Task = ""
+        self.TimeToExecute = tte
+        self.Task = t
         self.Position = Position()
         self.Penalty = penalty
         self.Decision = decision
@@ -340,8 +343,8 @@ class ActionRecord(object):
 
 class Solution(object):
     def __init__(self):
-        self.TimeStamp = time()
-        self.HaltTask = Task()
+        self.TimeStamp = None
+        self.HaltTask = None
         self.Priority = ""
         self.Distance = 0
         self.Record = list() #of action record
@@ -897,6 +900,7 @@ class PredictiveTree(object):
         self.UnmodifiedTaskQ = self.Root.Q.__deepcopy__(memo)
         self.Priority = "DISTANCE"
         self.Solutions = list()
+        self.CurrentWatchdog:WatchDog  = None
         
         self.Root.Parent = -1
         #self.Root.ID = self.ID_Gen.Get()
@@ -1009,38 +1013,64 @@ class PredictiveTree(object):
 
     def BuildSolutionObject(self):
         now = datetime.now()
-        current_timestring = now.strftime("%Y%m%d-%H%M%S")
         branches = 0
         penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
         self.Solutions= list()
+        solutionHolder = list()
         memo_sol = dict()
         for i, n in enumerate(self.Nodes):
             if(not (n.Children.__len__())):
                 branches = branches + 1
                 self.BranchEnds.append(n.ID)
                 self.BranchNodes.append(n)
-        print("Branches: "  + str(self.BranchEnds))
         for i, n in enumerate(self.BranchNodes):
+            soln = Solution()
             branch = self.GetFullBranch(n)
             d = self.GetBranchDistance(branch)
             c = self.GetBranchConfidence(branch) 
-            print("")
-            print("Option#: "+ str(i))
-            print("Distance: "+str(d)+" m")
-            print("Confidence: "+str(c)+" %")
-            print("Decisions: "+ str(n.DecisionStack))
-            print("")
-            print("CONNECTION DEPENDENT TASK PENALTIES (s)")
-            print("======================================")
+            actionList = self.GetBranchActionList(branch)
             p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker).Print()
-            print("********************************************************************************")
             solution = HaltSolution(i,self.BranchEnds[i],c,d,p_norm,n.DecisionStack)
+            soln.Confidence = c
+            soln.DecisionStack = n.DecisionStack
+            soln.HaltTask = None
+            soln.Distance =d
+            soln.Record = actionList
+            solutionHolder.append(soln)
+
             self.Solutions.append(solution.__deepcopy__(memo_sol))
+        return solutionHolder
+
+    def GetBranchActionList(self, branch:list):
+        x=0
+        actions = list()
+        
+        n:Node
+        if(self.CurrentWatchdog):
+            actions.append(self.CurrentWatchdog.GetActionList())
+
+
+
+        for i, n in enumerate(branch):
+                
+                if( i < (branch.__len__()-2 )):
+                    pos:Position = branch[i].Position
+                    tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
+                    d = ""
+                    p = ""
+                    action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,d,p,n.Confidence)
+                    actions.append(action_temp)
+
+        return actions
+
+            
+
 
 
     def GetBranchDistance(self,branch:list):
         x=0
         distance = 0
+        
         for i, n in enumerate(branch):
             if( i < (branch.__len__() -2)):
                 start:Position = branch[i].Position
