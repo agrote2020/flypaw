@@ -54,8 +54,9 @@ emptyList = list()
 root:Node =  Node(0,tq,t,0,0,wph,id,emptyList,pt,1.0)
 tree:PredictiveTree = PredictiveTree(root)
 tree.HaltPoint(False)
-#tree.PrintNodes()
-a  = tree.BuildSolutionObject()
+tree.PrintNodes()
+#a  = tree.BuildSolutionObject()
+tree.BranchAnalyze()
 
 
 
