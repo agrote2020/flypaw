@@ -327,7 +327,18 @@ class WatchDog(object):
             f.write(JSON_DUMP_LIST)
 
     def GetActionList(self):
-        x=0
+        records = list()
+        lastTime = 0
+        for k in self.keys:
+            t:Task = self.Actions.get(str(k))
+            d_time = self.ActionTimeStamps.get(str(k))-lastTime
+            lastTime = self.ActionTimeStamps.get(str(k))
+            penalty = 0
+            if(t.comms_required):
+                penalty = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+            rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
+            records.append(rec)
+        return records
         
             
 
@@ -336,7 +347,7 @@ class ActionRecord(object):
     def __init__(self, tte,t:Task,pos:Position,penalty,decision,confidence):
         self.TimeToExecute = tte
         self.Task = t
-        self.Position = Position()
+        self.Position = pos
         self.Penalty = penalty
         self.Decision = decision
         self.Confidence = confidence
@@ -350,6 +361,7 @@ class Solution(object):
         self.Record = list() #of action record
         self.Confidence = 100.0
         self.DecisionStack = list()#of decisions
+        self.Penalty:TaskPenaltyTracker = None
 
 class SpeculativeProduct(object):
     def __init__(self):
@@ -1029,16 +1041,15 @@ class PredictiveTree(object):
             d = self.GetBranchDistance(branch)
             c = self.GetBranchConfidence(branch) 
             actionList = self.GetBranchActionList(branch)
-            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker).Print()
-            solution = HaltSolution(i,self.BranchEnds[i],c,d,p_norm,n.DecisionStack)
+            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
             soln.Confidence = c
             soln.DecisionStack = n.DecisionStack
             soln.HaltTask = None
             soln.Distance =d
             soln.Record = actionList
+            soln.Penalty = p_norm
             solutionHolder.append(soln)
 
-            self.Solutions.append(solution.__deepcopy__(memo_sol))
         return solutionHolder
 
     def GetBranchActionList(self, branch:list):

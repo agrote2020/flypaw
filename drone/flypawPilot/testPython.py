@@ -54,9 +54,18 @@ emptyList = list()
 root:Node =  Node(0,tq,t,0,0,wph,id,emptyList,pt,1.0)
 tree:PredictiveTree = PredictiveTree(root)
 tree.HaltPoint(False)
-tree.PrintNodes()
-#a  = tree.BuildSolutionObject()
-tree.BranchAnalyze()
+#tree.PrintNodes()
+exper = ExperimentResults()
+a  = tree.BuildSolutionObject()
+executionRec = wd.GetActionList()
+exper.SpeculativeSolutionSets.append(a)
+exper.ExecutionRecord = executionRec
+JSON_DUMP_TASK = jsonpickle.encode(exper,unpicklable=False,indent=True)
+
+with open('experimentDebug.json','w') as f:
+    f.write(JSON_DUMP_TASK)
+
+#tree.BranchAnalyze()
 
 
 
