@@ -297,7 +297,7 @@ class WatchDog(object):
             self.Actions[task.uniqueID] = task
             self.ActionTimeStamps[task.uniqueID] = time.time()
             self.lastTimeStamp = self.ActionTimeStamps[task.uniqueID]
-            print("TTE: " + self.LastTimeStamp)
+            print("TTE: " + str(self.LastTimeStamp))
             self.CheckStopwatches(task.uniqueID)
             self.keys.append(task.uniqueID)
             self.OrderofExecution[task.uniqueID] = self.ExecutionOrderGenerator.Get()
