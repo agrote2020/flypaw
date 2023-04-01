@@ -292,6 +292,7 @@ class WatchDog(object):
             x=0#throw exception
 
     def ActionComplete(self,task:Task):
+        print("ACTION COMPLETE!")
         if(not self.Actions.get(task.uniqueID)):
             self.Actions[task.uniqueID] = task
             self.ActionTimeStamps[task.uniqueID] = time.time()
