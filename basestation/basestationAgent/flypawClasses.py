@@ -272,6 +272,7 @@ class WatchDog(object):
         self.WatchdogStartStamp = None
         self.ExecutionOrderGenerator = IDGenerator()
         self.Normal:TaskPenaltyNormalizer = None
+        self.LastTimeStamp = None
 
     def InitStopwatches(self,criticalTasks:list):
         x=0
@@ -286,6 +287,7 @@ class WatchDog(object):
                 self.Stopwatches.get(sw).StartWatch()
             self.StartedStopwatches = True 
             self.WatchdogStartStamp = time.time()
+            self.LastTimeStamp = self.WatchdogStartStamp
         else:
             x=0#throw exception
 
@@ -293,6 +295,8 @@ class WatchDog(object):
         if(not self.Actions.get(task.uniqueID)):
             self.Actions[task.uniqueID] = task
             self.ActionTimeStamps[task.uniqueID] = time.time()
+            self.lastTimeStamp = self.ActionTimeStamps[task.uniqueID]
+            print("TTE: " + self.LastTimeStamp)
             self.CheckStopwatches(task.uniqueID)
             self.keys.append(task.uniqueID)
             self.OrderofExecution[task.uniqueID] = self.ExecutionOrderGenerator.Get()
@@ -1068,7 +1072,7 @@ class PredictiveTree(object):
                     pos:Position = branch[i].Position
                     tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
                     d = ""
-                    p = ""
+                    p = n.PenaltyTracker
                     action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,d,p,n.Confidence)
                     actions.append(action_temp)
 
