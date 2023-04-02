@@ -343,6 +343,7 @@ class WatchDog(object):
         print(str(self.Actions))
 
         for k in self.keys:
+            print("GET ATTEMPT: " + str(self.Actions.get(str(k))) )
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
                 if(records.__len__()<1):
