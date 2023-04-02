@@ -773,6 +773,7 @@ class FlyPawPilot(StateMachine):
             f.write(JSON_DUMP_WD)
         self.WatchDog.DumpReport()
         experiment = ExperimentResults()
+        print("SpeculativeProduct List Length: " + str(self.SpeculationList.__len__()))
         experiment.SpeculativeSolutionSets = self.SpeculationList
         experiment.ExecutionRecord = self.WatchDog.GetActionList()
         JSON_DUMP_EEE = jsonpickle.encode(experiment)
@@ -1067,7 +1068,7 @@ class FlyPawPilot(StateMachine):
             tree.HaltPoint(False)
             #tree.PrintNodes()
             speculation.Solutions.append(tree.BuildSolutionObject())
-
+            
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)
             with open('json_dump_wph.txt','w') as f:
@@ -1077,7 +1078,7 @@ class FlyPawPilot(StateMachine):
             ConnectionSeekingTasks = self.GetPathToConnection()#This should *almost*(why did I write almost so speculatively) always find a path.
             ReccomendedConnectionPath = self.PickPathToRestablish(ConnectionSeekingTasks)
 
-
+            self.SpeculationList.append(speculation)
 
 
             self.taskQ.PopTask()

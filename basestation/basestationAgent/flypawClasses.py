@@ -337,6 +337,7 @@ class WatchDog(object):
     def GetActionList(self):
         records = list()
         lastTime = 0
+        print("Action List Keys: "+str(self.keys.__len__()))
         for k in self.keys:
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
