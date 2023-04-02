@@ -776,7 +776,7 @@ class FlyPawPilot(StateMachine):
         print("SpeculativeProduct List Length: " + str(self.SpeculationList.__len__()))
         experiment.SpeculativeSolutionSets = self.SpeculationList
         experiment.ExecutionRecord = self.WatchDog.GetActionList()
-        JSON_DUMP_EEE = jsonpickle.encode(experiment)
+        JSON_DUMP_EEE = jsonpickle.encode(experiment,unpicklable=False,indent=True)
         with open('EXPERIMENT_DUMP.json','w') as f:
             f.write(JSON_DUMP_EEE)
 
