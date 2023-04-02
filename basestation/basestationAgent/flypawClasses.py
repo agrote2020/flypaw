@@ -329,7 +329,7 @@ class WatchDog(object):
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
-                print("ERROR!")
+                print("DumpReport:ERROR!")
         JSON_DUMP_LIST = jsonpickle.encode(records)
         with open('ActionRecord.json','w') as f:
             f.write(JSON_DUMP_LIST)
@@ -338,6 +338,10 @@ class WatchDog(object):
         records = list()
         lastTime = 0
         print("Action List Keys: "+str(self.keys.__len__()))
+        print("KEYS: ")
+        print(str(self.keys))
+        print(str(self.Actions))
+
         for k in self.keys:
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
@@ -353,7 +357,7 @@ class WatchDog(object):
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
-                print("ERROR!")
+                print("GetActionList:ERROR!")
 
         return records
         
