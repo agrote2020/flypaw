@@ -351,6 +351,7 @@ class WatchDog(object):
 
 
             print("GET ATTEMPT: " + str(str(k)) )
+            print("MISTYPE? " + str(self.Actions.__class__))
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
                 
