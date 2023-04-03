@@ -342,7 +342,9 @@ class WatchDog(object):
         print("KEYS: ")
         print(str(self.keys))
         print(str(self.Actions))
-
+        JSON_DUMP_LIST = jsonpickle.encode(self.Actions)
+        with open('ActionError.json','w') as f:
+            f.write(JSON_DUMP_LIST)
 
     
 
@@ -351,7 +353,19 @@ class WatchDog(object):
 
 
             print("GET ATTEMPT: " + str(str(k)) )
+            print("GET ATTEMPT INT: " + str(self.Actions.get(k )))
             print("MISTYPE? " + str(self.Actions.__class__))
+            print("LENGTH? " + str(self.Actions.__len__()))
+            keysFromDict = self.Actions.keys()
+            print("KEYS FROM DICT? " + str(keysFromDict))
+            SON_DUMP_LIST = jsonpickle.encode(self.Actions.keys)
+            l = keysFromDict.__len__()
+            print(keysFromDict.__class__)
+            if(l>0):
+                print("KEY CLASS:" + str(keysFromDict.pop.__class__))
+
+
+
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
                 
