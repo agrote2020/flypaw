@@ -348,7 +348,7 @@ class WatchDog(object):
             f.write(JSON_DUMP_LIST)
         for j in self.Actions.keys():
             keyType = type(j)
-
+        print("KEY_TYPE")
 
         for k in self.keys:
 
@@ -359,18 +359,18 @@ class WatchDog(object):
                 x=0
                 k_itr = int(k)
 
-            if(self.Actions.get(str(k_itr))):
-                t:Task = self.Actions.get(str(k_itr))
+            if(self.Actions.get(k_itr)):
+                t:Task = self.Actions.get(k_itr)
                 
                 if(records.__len__()<1):
-                    d_time = self.ActionTimeStamps.get(str(k_itr))-self.WatchdogStartStamp
+                    d_time = self.ActionTimeStamps.get(k_itr)-self.WatchdogStartStamp
                 else:
-                    d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
-                d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
-                lastTime = self.ActionTimeStamps.get(str(k_itr))
+                    d_time = self.ActionTimeStamps.get(k_itr)-lastTime
+                d_time = self.ActionTimeStamps.get(k_itr)-lastTime
+                lastTime = self.ActionTimeStamps.get(k_itr)
                 penalty = 0
                 if(t.comms_required):
-                    penalty = self.ActionTimeStamps.get(str(k_itr)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+                    penalty = self.ActionTimeStamps.get(k_itr) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
