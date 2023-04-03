@@ -338,6 +338,7 @@ class WatchDog(object):
         
         records = list()
         lastTime = 0
+        iteratorType = "STRING"
         print("Action List Keys: "+str(self.keys.__len__()))
         print("KEYS: ")
         print(str(self.keys))
@@ -345,39 +346,31 @@ class WatchDog(object):
         JSON_DUMP_LIST = jsonpickle.encode(self.Actions)
         with open('ActionError.json','w') as f:
             f.write(JSON_DUMP_LIST)
+        for j in self.Actions.keys():
+            keyType = type(j)
 
-    
 
         for k in self.keys:
 
+            if(keyType==str):
+                x=0
+                k_itr = str(k)
+            else:
+                x=0
+                k_itr = int(k)
 
-
-            print("GET ATTEMPT: " + str(str(k)) )
-            print("GET ATTEMPT INT: " + str(self.Actions.get(k )))
-            print("MISTYPE? " + str(self.Actions.__class__))
-            print("LENGTH? " + str(self.Actions.__len__()))
-            keysFromDict = self.Actions.keys()
-            print("KEYS FROM DICT? " + str(keysFromDict))
-            SON_DUMP_LIST = jsonpickle.encode(self.Actions.keys)
-            l = keysFromDict.__len__()
-            print(keysFromDict.__class__)
-            if(l>0):
-                print("KEY CLASS:" + str(keysFromDict.pop.__class__))
-
-
-
-            if(self.Actions.get(str(k))):
-                t:Task = self.Actions.get(str(k))
+            if(self.Actions.get(str(k_itr))):
+                t:Task = self.Actions.get(str(k_itr))
                 
                 if(records.__len__()<1):
-                    d_time = self.ActionTimeStamps.get(str(k))-lastTime
+                    d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
                 else:
-                    d_time = self.ActionTimeStamps.get(str(k))-self.WatchdogStartStamp
-                d_time = self.ActionTimeStamps.get(str(k))-lastTime
-                lastTime = self.ActionTimeStamps.get(str(k))
+                    d_time = self.ActionTimeStamps.get(str(k_itr))-self.WatchdogStartStamp
+                d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
+                lastTime = self.ActionTimeStamps.get(str(k_itr))
                 penalty = 0
                 if(t.comms_required):
-                    penalty = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+                    penalty = self.ActionTimeStamps.get(str(k_itr)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
