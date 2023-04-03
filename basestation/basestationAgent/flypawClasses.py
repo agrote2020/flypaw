@@ -363,9 +363,9 @@ class WatchDog(object):
                 t:Task = self.Actions.get(str(k_itr))
                 
                 if(records.__len__()<1):
-                    d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
-                else:
                     d_time = self.ActionTimeStamps.get(str(k_itr))-self.WatchdogStartStamp
+                else:
+                    d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
                 d_time = self.ActionTimeStamps.get(str(k_itr))-lastTime
                 lastTime = self.ActionTimeStamps.get(str(k_itr))
                 penalty = 0
