@@ -335,6 +335,7 @@ class WatchDog(object):
             f.write(JSON_DUMP_LIST)
 
     def GetActionList(self):
+        
         records = list()
         lastTime = 0
         print("Action List Keys: "+str(self.keys.__len__()))
@@ -342,10 +343,17 @@ class WatchDog(object):
         print(str(self.keys))
         print(str(self.Actions))
 
+
+    
+
         for k in self.keys:
+
+
+
             print("GET ATTEMPT: " + str(str(k)) )
             if(self.Actions.get(str(k))):
                 t:Task = self.Actions.get(str(k))
+                
                 if(records.__len__()<1):
                     d_time = self.ActionTimeStamps.get(str(k))-lastTime
                 else:

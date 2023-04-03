@@ -767,8 +767,8 @@ class FlyPawPilot(StateMachine):
         post flight cleanup
         """
         self.WaypointHistory.PrintWorkingHistory()
-        self.WatchDog.Print()
         JSON_DUMP_WD = jsonpickle.encode(self.WatchDog)
+        self.WatchDog.Print()
         with open('dump_watchdog.json','w') as f:
             f.write(JSON_DUMP_WD)
         self.WatchDog.DumpReport()
