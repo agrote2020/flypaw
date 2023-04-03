@@ -366,7 +366,6 @@ class WatchDog(object):
                     d_time = self.ActionTimeStamps.get(k_itr)-self.WatchdogStartStamp
                 else:
                     d_time = self.ActionTimeStamps.get(k_itr)-lastTime
-                d_time = self.ActionTimeStamps.get(k_itr)-lastTime
                 lastTime = self.ActionTimeStamps.get(k_itr)
                 penalty = 0
                 if(t.comms_required):
@@ -1105,7 +1104,7 @@ class PredictiveTree(object):
                 if( i < (branch.__len__()-2 )):
                     pos:Position = branch[i].Position
                     tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
-                    d = ""
+                    d = n.DecisionStack 
                     p = n.PenaltyTracker
                     action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,d,p,n.Confidence)
                     actions.append(action_temp)

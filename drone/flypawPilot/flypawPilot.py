@@ -1069,6 +1069,7 @@ class FlyPawPilot(StateMachine):
             tree:PredictiveTree = PredictiveTree(root)
             tree.HaltPoint(False)
             #tree.PrintNodes()
+            tree.CurrentWatchdog = self.WatchDog
             speculation.Solutions.append(tree.BuildSolutionObject())
             
             with open('json_dump_q.txt','w') as f:

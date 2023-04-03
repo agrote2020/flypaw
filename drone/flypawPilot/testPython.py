@@ -56,6 +56,7 @@ tree:PredictiveTree = PredictiveTree(root)
 tree.HaltPoint(False)
 #tree.PrintNodes()
 exper = ExperimentResults()
+tree.CurrentWatchdog = wd
 a  = tree.BuildSolutionObject()
 executionRec = wd.GetActionList()
 exper.SpeculativeSolutionSets.append(a)
