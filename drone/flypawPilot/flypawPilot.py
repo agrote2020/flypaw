@@ -35,10 +35,10 @@ from aerpawlib.util import VectorNED, Coordinate
 from aerpawlib.vehicle import Vehicle
 from aerpawlib.vehicle import Drone
 
-#sys.path.append('/root/agrote/flypaw/basestation/basestationAgent')
 thisFileDir = os.path.realpath(os.path.dirname(__file__))
 flypawRootDir = os.path.realpath(os.path.join(thisFileDir , '..', '..'))
 flypawClassDir = os.path.realpath(os.path.join(flypawRootDir, 'basestation','basestationAgent'))
+sys.path.append(flypawClassDir)
 from flypawClasses import *
 #import flypawClasses
 
