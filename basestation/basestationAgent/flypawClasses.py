@@ -391,6 +391,7 @@ class ActionRecord(object):
 
 class Solution(object):
     def __init__(self):
+        self.OptionNumber = -1
         self.TimeStamp = None
         self.HaltTask = None
         self.Priority = ""
@@ -403,8 +404,30 @@ class Solution(object):
 class SpeculativeProduct(object):
     def __init__(self):
         self.Solutions  = list()
-        self.ElectedSolution = 0 #soln. number
+        self.ElectedSolution = -1 #soln. number
         self.Priority = ""
+
+    def Recommend(self):
+        priority = self.Priority
+        bestSolution:Solution = self.Solutions[0]
+        
+        for sol in self.Solutions:
+            if(priority == "DISTANCE"):
+                if(sol.Distance<bestSolution.Distance):
+                    bestSolution = sol
+            if(priority == "CONFIDENCE"):
+                if(sol.Confidence>bestSolution.Confidence):
+                    bestSolution = sol
+            if(priority == "TOTAL_DELAY"):
+                if(sol.Penalty.TotalDelay()<bestSolution.Penalty.TotalDelay()):
+                    bestSolution = sol
+        print("Based on "+ priority + " option #" + str(bestSolution.OptionNumber) + "is the optimal solution")
+        self.ElectedSolution = bestSolution.OptionNumber
+
+    def GetRecommendation(self):
+        if(self.ElectedSolution > -1):
+            return self.Solutions[self.ElectedSolution]
+        
 
 
 class ExperimentResults(object):
@@ -503,7 +526,12 @@ class TaskQueue(object):
         return taskList
     
 
-
+    def CaptivesHeld(self):
+        x=0
+        if(self.TaskLock.Count<1):
+            return False
+        else:
+            return True
 
 
     def __deepcopy__(self, memo):
@@ -860,14 +888,17 @@ class TaskHold(object):
     def __init__(self):
         self.Captives = []
         self.Reasons = []
+        self.Count = 0
 
 
     def HoldTask(self, t):
         self.Captives.append(t)
         self.Reasons.append("CONNECTION")
+        self.Count = self.Count + 1
 
     def ReleaseTask(self):
         self.Reasons.pop()
+        self.Count = self.Count - 1
         return self.Captives.pop()
 
     def __deepcopy__(self, memo):
@@ -881,6 +912,7 @@ class TaskHold(object):
     def __RESET__(self):
         self.Captives = []
         self.Reasons = []
+        self.Count = 0
 
 class HaltSolution(object):
     def __init__(self,optionNum,branch,confidence,distance,penaltyTracker, decisions):
@@ -1079,6 +1111,7 @@ class PredictiveTree(object):
             c = self.GetBranchConfidence(branch) 
             actionList = self.GetBranchActionList(branch)
             p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
+            soln.OptionNumber = i
             soln.Confidence = c
             soln.DecisionStack = n.DecisionStack
             soln.HaltTask = None
@@ -1087,7 +1120,12 @@ class PredictiveTree(object):
             soln.Penalty = p_norm
             solutionHolder.append(soln)
 
-        return solutionHolder
+        spec = SpeculativeProduct()
+        spec.Priority = self.Priority
+        spec.Solutions = solutionHolder
+        spec.Recommend()
+        
+        return spec
 
     def GetBranchActionList(self, branch:list):
         x=0
@@ -1106,12 +1144,26 @@ class PredictiveTree(object):
                     tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
                     d = n.DecisionStack 
                     p = n.PenaltyTracker
-                    action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,d,p,n.Confidence)
+                    action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,p,d,n.Confidence)
                     actions.append(action_temp)
 
         return actions
 
-            
+    def Recommend_OBSOLETE(self):
+        priority = self.Priority
+        bestSolution:HaltSolution = self.Solutions[0]
+        for sol in self.Solutions:
+            if(priority == "DISTANCE"):
+                if(sol.TotalDistance<bestSolution.TotalDistance):
+                    bestSolution = sol
+            if(priority == "CONFIDENCE"):
+                if(sol.Confidence>bestSolution.Confidence):
+                    bestSolution = sol
+            if(priority == "TOTAL_DELAY"):
+                if(sol.Penalties.TotalDelay()<bestSolution.Penalties.TotalDelay()):
+                    bestSolution = sol
+        print("Based on "+ priority + " option #" + str(bestSolution.OptionNum) + " is the optimal solution")
+        return bestSolution  
 
 
 

@@ -77,6 +77,7 @@ class FlyPawPilot(StateMachine):
         self.CriticalTaskTimers = list()
         self.WatchDog =WatchDog()
         self.SpeculationList = list()
+        self.Hold = TaskHold() #Task Hold !duh!
 
         
 
@@ -1046,7 +1047,6 @@ class FlyPawPilot(StateMachine):
     def EvaluateTaskQ(self):
 
         #Check if connection is needed
-        print("EVALUATE!!!!")
         RadioConnectionWayPoint = Position()
         nextTask = self.taskQ.NextTask()
         print(str(nextTask))
@@ -1070,26 +1070,65 @@ class FlyPawPilot(StateMachine):
             tree.HaltPoint(False)
             #tree.PrintNodes()
             tree.CurrentWatchdog = self.WatchDog
-            speculation.Solutions.append(tree.BuildSolutionObject())
+            currentSpecSolution = tree.BuildSolutionObject()
+            speculation.Solutions.append(currentSpecSolution)
+            self.SpeculationList.append(speculation) 
+            
             
             with open('json_dump_q.txt','w') as f:
                 f.write(JSON_DUMP)
             with open('json_dump_wph.txt','w') as f:
                 f.write(JSON_DUMP_WPH)
 
-
-            ConnectionSeekingTasks = self.GetPathToConnection()#This should *almost*(why did I write almost so speculatively) always find a path.
-            ReccomendedConnectionPath = self.PickPathToRestablish(ConnectionSeekingTasks)
-
-            self.SpeculationList.append(speculation)
+            
 
 
-            self.taskQ.PopTask()
-            self.taskQ.AppendTasks(ReccomendedConnectionPath)
-            print("No connection...queueing flight to connection returning to nearest point with connection!")
-            print("Reprinting Updated Queue...")
+
+
+            recommendedSolution:Solution = currentSpecSolution.GetRecommendation()
+            rec = recommendedSolution.DecisionStack[recommendedSolution.DecisionStack.__len__()]
+            print("Recommended Solution: " + rec)
+
+            if(rec == "LOF"):
+                rec = "BACKSTEP"
+            elif(rec =="BLOCK"):
+                rec = "BACKSTEP"
+            elif(rec =="HOLD"):
+                rec = "BACKSTEP"
+
+            print("Defaulting to BACKSTEP")
+
+            if(rec=="BACKSTEP"):
+                x=0
+                BackPath = self.BackStepPath()
+                self.taskQ.PopTask()#This is probably ineffective now i.e. it only makes sense when we backstep
+                self.taskQ.AppendTasks(BackPath)
+                #do back step
+            elif(rec=="HOLD"):
+                x=0
+                self.taskQ.HoldTopTask()##this will lock away the top task until it is appropriate to release
+                #do hold
+            else:
+                x=0
+                #error
+            
+            
+
+
+
+            # self.taskQ.PopTask()#This is probably ineffective now i.e. it only makes sense when we backstep
+            # self.taskQ.AppendTasks(ReccomendedConnectionPath)
+
             self.taskQ.PrintQ()
             time.sleep(10)
+        else:
+
+            while(self.taskQ.CaptivesHeld):
+                self.taskQ.Release()
+                
+        
+
+
 
 
 
@@ -1146,6 +1185,42 @@ class FlyPawPilot(StateMachine):
         taskConversion.append(BackTrackTaskList)
         if(len(ForwardSteps)):
             taskConversion.append(ForwardSteps)
+
+        
+
+        return taskConversion
+
+
+
+    def BackStepPath(self):
+        #RadioConnectionWayPoint = self.radioMap.FindClosestPointWithConnection(None,self.currentPosition,self.RadioPosition)
+
+
+
+        #BackStep Path! always a pretty safe option
+        backSteps = self.WaypointHistory.BackTrackPathForConnectivity()
+        print("BackSteps: ")
+        self.WaypointHistory.PrintListOfStepsGeneric(backSteps)
+        taskConversion = []
+        nextTask = self.taskQ.NextTask()
+        backSteps.reverse()
+        insertPostion = 0
+        for idx, waypoint in enumerate(backSteps):
+ 
+            if(waypoint[1]):
+                print("Appending Next Task!")
+                taskConversion.append(nextTask)
+            t = Task(waypoint[0],"FLIGHT",0,0,self.TaskIDGen.Get())
+            t.dynamicTask = True
+            print("TASK ID: "+str(waypoint[2])) 
+            taskConversion.append(t)
+        
+
+        BackTrackTaskList = taskConversion
+        taskConversion = []
+        #for now, lets just return a list of two tasks sets, but this should be an object in the future
+        taskConversion.append(BackTrackTaskList)
+
 
         
 
