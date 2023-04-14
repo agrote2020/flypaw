@@ -1126,7 +1126,7 @@ class FlyPawPilot(StateMachine):
             time.sleep(10)
         else:
 
-            while(self.taskQ.CaptivesHeld):
+            while(self.taskQ.CaptivesHeld()):
                 self.taskQ.Release()
                 
         
