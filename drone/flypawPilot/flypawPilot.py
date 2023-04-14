@@ -1089,7 +1089,7 @@ class FlyPawPilot(StateMachine):
 
 
             recommendedSolution:Solution = currentSpecSolution.GetRecommendation()
-            rec = recommendedSolution.DecisionStack[recommendedSolution.DecisionStack.__len__()]
+            rec = recommendedSolution.DecisionStack[recommendedSolution.DecisionStack.__len__()-1]
             print("Recommended Solution: " + rec)
 
             if(rec == "LOF"):
