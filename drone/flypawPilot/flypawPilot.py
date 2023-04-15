@@ -1227,8 +1227,7 @@ class FlyPawPilot(StateMachine):
 
         
 
-        return taskConversion
-
+        return BackTrackTaskList
     #This should really be managed by a dictionary
     def TaskListTimeEstimate(self,taskList):
 
