@@ -1126,7 +1126,8 @@ class FlyPawPilot(StateMachine):
             self.taskQ.PrintQ()
             time.sleep(10)
         else:
-
+            print("TaskHold Empty:"+ str(self.taskQ.CaptivesHeld()))
+            print("Captives:"+ str(self.taskQ.TaskLock.Captives.__len__()))
             while(self.taskQ.CaptivesHeld()):
                 self.taskQ.Release()
                 

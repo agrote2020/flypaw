@@ -421,7 +421,7 @@ class SpeculativeProduct(object):
             if(priority == "TOTAL_DELAY"):
                 if(sol.Penalty.TotalDelay()<bestSolution.Penalty.TotalDelay()):
                     bestSolution = sol
-        print("Based on "+ priority + " option #" + str(bestSolution.OptionNumber) + "is the optimal solution")
+        print("Based on "+ priority + " option #" + str(bestSolution.OptionNumber) + " is the optimal solution")#need a space here U.U
         self.ElectedSolution = bestSolution.OptionNumber
 
     def GetRecommendation(self):
