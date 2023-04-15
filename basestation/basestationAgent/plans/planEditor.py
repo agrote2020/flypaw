@@ -36,7 +36,7 @@ oldFile = open(oldFilePath, "r+")
 missionFile = json.load(oldFile)
 oldFile.close()
 
-missionFile['fileType'] = 'TaskQ'
+missionFile['fileType'] = 'TaskQ_Plan'
 mission =  missionFile['mission']
 items = mission['items']
 index = 0
