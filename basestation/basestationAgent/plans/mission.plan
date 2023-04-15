@@ -17,7 +17,7 @@
                 "Altitude": 30,
                 "AltitudeMode": 1,
                 "autoContinue": true,
-                "command": 22,
+                "command": 16,
                 "doJumpId": 1,
                 "frame": 3,
                 "params": [
