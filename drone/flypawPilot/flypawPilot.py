@@ -1098,7 +1098,7 @@ class FlyPawPilot(StateMachine):
             elif(rec =="BLOCK"):
                 rec = "BACKSTEP"
             elif(rec =="HOLD"):
-                rec = "BACKSTEP"
+                rec = "HOLD"
 
             print("Defaulting to BACKSTEP")
 
