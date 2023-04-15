@@ -1,5 +1,5 @@
 {
-    "fileType": "TaskQ",
+    "fileType": "TaskQ_Plan",
     "geoFence": {
         "circles": [],
         "polygons": [],

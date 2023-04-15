@@ -480,8 +480,9 @@ class FlyPawPilot(StateMachine):
 
         ##set heading... unnecessary unless we want to have a heading other than the direction of motion 
         #drone.set_heading(bearing_from_here)
-        
+        print("Trying to fly...")
         await drone.goto_coordinates(defaultNextCoord)
+        print("Ya...")
         self.WatchDog.ActionComplete(self.CurrentTask)
         return "waypoint_entry" 
 
