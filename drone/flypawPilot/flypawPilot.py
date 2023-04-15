@@ -1130,6 +1130,7 @@ class FlyPawPilot(StateMachine):
             print("Captives:"+ str(self.taskQ.TaskLock.Captives.__len__()))
             while(self.taskQ.CaptivesHeld()):
                 self.taskQ.Release()
+                print("Task Released!!!------------------------------------")
                 
         
 
