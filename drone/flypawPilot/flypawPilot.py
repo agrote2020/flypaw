@@ -1084,8 +1084,7 @@ class FlyPawPilot(StateMachine):
             JSON_DUMP_SPEC = jsonpickle.encode(currentSpecSolution)
             with open('json_dump_spec.txt','w') as f:
                 f.write(JSON_DUMP_SPEC)
-            speculation.Solutions.append(currentSpecSolution)
-            self.SpeculationList.append(speculation) 
+            self.SpeculationList.append(currentSpecSolution) 
             
             
 
