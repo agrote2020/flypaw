@@ -1081,6 +1081,9 @@ class FlyPawPilot(StateMachine):
             #tree.PrintNodes()
             tree.CurrentWatchdog = self.WatchDog
             currentSpecSolution = tree.BuildSolutionObject()
+            JSON_DUMP_SPEC = jsonpickle.encode(currentSpecSolution)
+            with open('json_dump_spec.txt','w') as f:
+                f.write(JSON_DUMP_SPEC)
             speculation.Solutions.append(currentSpecSolution)
             self.SpeculationList.append(speculation) 
             
