@@ -515,6 +515,11 @@ class TaskQueue(object):
         task = self.TaskLock.ReleaseTask()
         self.AppendTask(task)
 
+    def ReleaseModifyPos(self,pos:Position):
+        task:Task = self.TaskLock.ReleaseTask()
+        task.ChangePosition(pos)
+        self.AppendTask(task)
+
     def GetCriticalTasks(self):
         x=0
         taskList = list()
@@ -1268,7 +1273,7 @@ class PredictiveTree(object):
     def CheckHold(self,Q:TaskQueue):
         if(self.Status.Connected):
             while(Q.TaskLock.Captives):
-                Q.Release()
+                Q.ReleaseModifyPos(self.Status.Position)
 
 
     def ActionableTask(self,t:Task,connected):#maybe this can be expanded to check battery etc.
@@ -1302,7 +1307,7 @@ class PredictiveTree(object):
 
         while(not Q.Empty()):
 
-
+            
             self.Status.Update(currentNode.LeadingTask.position,currentNode.Connected)
             previousLeadingTask = LeadingTask
             #t:Task = Q.PopTask()
@@ -1377,8 +1382,8 @@ class PredictiveTree(object):
         memo_q = dict()
         Q:TaskQueue = HaltNode.Q.__deepcopy__(memo_q) #want to return a node with the same Q (just updated)
         nextTask = Q.Peek()
-        currentPosition = Q.Peek().position
-        connected = self.ConnectionThreshold(Q.Peek().position,1.00)
+        currentPosition = self.Status.Position
+        connected = self.ConnectionThreshold(currentPosition,1.00)
         self.Status.Update(currentPosition,connected)
         while(not self.ActionableTask(Q.Peek(),connected)):
             nodesHeld.append(Q.Peek())
