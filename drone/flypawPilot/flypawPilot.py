@@ -1067,6 +1067,12 @@ class FlyPawPilot(StateMachine):
             JSON_DUMP_WPH = jsonpickle.encode(self.WaypointHistory)
             emptyList = list()
             t = self.taskQ.NextTask()
+
+            with open('json_dump_q.txt','w') as f:
+                f.write(JSON_DUMP)
+            with open('json_dump_wph.txt','w') as f:
+                f.write(JSON_DUMP_WPH)
+            
             speculation =  SpeculativeProduct()
             pt = TaskPenaltyTracker(self.taskQ)
             root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
@@ -1079,10 +1085,6 @@ class FlyPawPilot(StateMachine):
             self.SpeculationList.append(speculation) 
             
             
-            with open('json_dump_q.txt','w') as f:
-                f.write(JSON_DUMP)
-            with open('json_dump_wph.txt','w') as f:
-                f.write(JSON_DUMP_WPH)
 
             
 
