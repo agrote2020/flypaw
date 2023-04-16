@@ -308,7 +308,7 @@ class FlyPawBasestationAgent(object):
         mission.missionType = "fire" #"bandwidth", "videography", "fire"
         mission.missionLeader = "basestation" #drone or basestation or cloud
         mission.priority = 1
-        mission.planfile = "./plans/mission_simple_TaskQ.plan"
+        mission.planfile = "./plans/simplePlan_TaskQ.plan"
         mission.default_waypoints = []
         plan = getPlanFromPlanfile(mission.planfile)
         processedPlan = processPlan(plan)
