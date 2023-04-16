@@ -401,6 +401,9 @@ class Solution(object):
         self.DecisionStack = list()#of decisions
         self.Penalty:TaskPenaltyTracker = None
 
+
+
+
 class SpeculativeProduct(object):
     def __init__(self):
         self.Solutions  = list()
@@ -862,6 +865,9 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         else:
             print("END OF BRANCH")
 
+        print("Task Penalty ID" + str(self.PenaltyTracker.taskID))
+        print("Task Statuses" + str(self.PenaltyTracker.taskStatus))
+
 
     def ChildrenCount(self):
         return self.Children.count
@@ -1112,6 +1118,8 @@ class PredictiveTree(object):
         for i, n in enumerate(self.BranchNodes):
             soln = Solution()
             branch = self.GetFullBranch(n)
+            # print("Solution# "+str(i))
+            # self.PrintBranch(branch)
             d = self.GetBranchDistance(branch)
             c = self.GetBranchConfidence(branch) 
             actionList = self.GetBranchActionList(branch)
@@ -1131,6 +1139,20 @@ class PredictiveTree(object):
         spec.Recommend()
         
         return spec
+    
+    def PrintBranch(self,branch:list):
+        x=0 
+        n:Node
+        for i, n in enumerate(branch):
+                
+            print("Node: "+ str(i))    
+            tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
+            print("TimeToExecute: "+ str(tte))    
+            print("Leading Task: "+ n.LeadingTask.task)    
+            print("Decsion Stack: "+ str(n.DecisionStack))    
+            print("------------------------------------")
+
+
 
     def GetBranchActionList(self, branch:list):
         x=0
@@ -1298,7 +1320,7 @@ class PredictiveTree(object):
         memo_n = dict()
         Q = nextNode.Q.__deepcopy__(memo_q)
         currentNode:Node = nextNode
-        currentPosition = self.Status.Position
+        currentPosition = currentNode.LeadingTask.position
         LeadingTask = currentNode.LeadingTask
         
         
@@ -1382,7 +1404,7 @@ class PredictiveTree(object):
         memo_q = dict()
         Q:TaskQueue = HaltNode.Q.__deepcopy__(memo_q) #want to return a node with the same Q (just updated)
         nextTask = Q.Peek()
-        currentPosition = self.Status.Position
+        currentPosition = HaltNode.LeadingTask.position
         connected = self.ConnectionThreshold(currentPosition,1.00)
         self.Status.Update(currentPosition,connected)
         while(not self.ActionableTask(Q.Peek(),connected)):
