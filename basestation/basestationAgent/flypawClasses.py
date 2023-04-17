@@ -489,6 +489,13 @@ class TaskQueue(object):
             print("Count: "+ str(self.Count))
             print("Next Task: " + str(task.task) + ": Position-- Lat:"+ str(task.position.lat)+ " Lon:"+ str(task.position.lon)+" Alt:"+ str(task.position.alt))
             print("")
+            print("Task Hold:")
+            print("============")
+            print("Count: " + str(self.TaskLock.Captives.__len__()))
+            print("============")
+            print("-----------------------------------------------")
+
+
     def Empty(self):
         if(self.Count == 0):
             return True
