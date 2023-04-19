@@ -874,6 +874,7 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
 
         print("Task Penalty ID" + str(self.PenaltyTracker.taskID))
         print("Task Statuses" + str(self.PenaltyTracker.taskStatus))
+        print("Confidence: " + str(self.Confidence))
 
 
     def ChildrenCount(self):
@@ -1008,6 +1009,7 @@ class PredictiveTree(object):
         self.Status.Update(r.LeadingTask.position,r.Connected)
 
     def PrintNodes(self):
+        n:Node
         for i, n in enumerate(self.Nodes):
             n.Print()
             print("-------------------")
@@ -1128,7 +1130,8 @@ class PredictiveTree(object):
             # print("Solution# "+str(i))
             # self.PrintBranch(branch)
             d = self.GetBranchDistance(branch)
-            c = self.GetBranchConfidence(branch) 
+            c = self.GetBranchConfidence(branch)
+            print("Confidence:"+ str(c))
             actionList = self.GetBranchActionList(branch)
             p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
             soln.OptionNumber = i
@@ -1219,7 +1222,7 @@ class PredictiveTree(object):
         confidence = 1.0
         for i, n in enumerate(branch):
                 confidence = confidence * n.Confidence
-                #print("CON: "+str(i)+"---"+str(n.Confidence))
+                print("CON: "+str(i)+"---"+str(n.Confidence))
         return confidence*100.0
             
 
