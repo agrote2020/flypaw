@@ -409,6 +409,7 @@ class SpeculativeProduct(object):
         self.Solutions  = list()
         self.ElectedSolution = -1 #soln. number
         self.Priority = ""
+        self.Confidences = list()
 
     def Recommend(self):
         priority = self.Priority
@@ -1118,6 +1119,7 @@ class PredictiveTree(object):
         penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
         self.Solutions= list()
         solutionHolder = list()
+        solutionConfidences = list()
         memo_sol = dict()
         for i, n in enumerate(self.Nodes):
             if(not (n.Children.__len__())):
@@ -1142,10 +1144,12 @@ class PredictiveTree(object):
             soln.Record = actionList
             soln.Penalty = p_norm
             solutionHolder.append(soln)
+            solutionConfidences.append(c)
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
         spec.Solutions = solutionHolder
+        spec.Confidences = solutionConfidences
         spec.Recommend()
         
         return spec
@@ -1372,7 +1376,7 @@ class PredictiveTree(object):
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
                 # n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
-                # n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...
+                # n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
                 # n_P.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 # n_F.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 currentNode.Adopt(n_P)
