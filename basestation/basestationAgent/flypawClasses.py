@@ -1371,8 +1371,8 @@ class PredictiveTree(object):
                 finish = Q.Empty()
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
-                n_P.DecisionStack.append("LOF")#Leap of faith! P/F
-                n_F.DecisionStack.append("LOF")#Leap of faith! P/F
+                # n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
+                # n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...
                 # n_P.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 # n_F.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 currentNode.Adopt(n_P)
