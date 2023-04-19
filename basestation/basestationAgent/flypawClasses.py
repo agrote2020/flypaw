@@ -410,6 +410,7 @@ class SpeculativeProduct(object):
         self.ElectedSolution = -1 #soln. number
         self.Priority = ""
         self.Confidences = list()
+        self.Delays = list()
 
     def Recommend(self):
         priority = self.Priority
@@ -1120,6 +1121,7 @@ class PredictiveTree(object):
         self.Solutions= list()
         solutionHolder = list()
         solutionConfidences = list()
+        solutionDelays = list()
         memo_sol = dict()
         for i, n in enumerate(self.Nodes):
             if(not (n.Children.__len__())):
@@ -1145,11 +1147,13 @@ class PredictiveTree(object):
             soln.Penalty = p_norm
             solutionHolder.append(soln)
             solutionConfidences.append(c)
+            solutionDelays.append(p_norm.TotalDelay())
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
         spec.Solutions = solutionHolder
         spec.Confidences = solutionConfidences
+        spec.Delays = solutionDelays
         spec.Recommend()
         
         return spec
