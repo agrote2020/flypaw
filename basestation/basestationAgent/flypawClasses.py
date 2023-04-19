@@ -411,6 +411,7 @@ class SpeculativeProduct(object):
         self.Priority = ""
         self.Confidences = list()
         self.Delays = list()
+        self.SolutionsCount  = 0
 
     def Recommend(self):
         priority = self.Priority
@@ -1154,6 +1155,7 @@ class PredictiveTree(object):
         spec.Solutions = solutionHolder
         spec.Confidences = solutionConfidences
         spec.Delays = solutionDelays
+        spec.SolutionsCount = spec.Solutions.__len__()
         spec.Recommend()
         
         return spec
