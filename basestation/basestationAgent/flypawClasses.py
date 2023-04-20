@@ -455,7 +455,98 @@ class ExperimentResults(object):
 
 
 
+class WaypointHistory(object):
+    def __init__(self):
+        self.TrueWaypointsAndConnection =[]
+        self.WaypointsAndConnection = []#list of Tuples (waypoint,connection_status,id)
+        self.Count = 0
+        self.TrueCount = 0
+    def _empty(self):
+        if(self.Count<1):
+            return 1
+        else:
+            return 0
 
+
+    def __deepcopy__(self, memo):
+        #print('Class'+ str(self.__class__))
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
+
+    def AddPoint(self,Waypoint,Connected):#compresses into tuple
+        self.WaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
+        self.TrueWaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
+        self.Count = self.Count + 1
+        self.TrueCount = self.TrueCount + 1
+
+    def StackPop(self):#return tuple
+        if(not self._empty()):
+            self.Count = self.Count - 1
+            return self.WaypointsAndConnection.pop(0)
+
+        else:
+            return None
+
+    def Peek(self):
+
+
+        if(not self._empty()):
+            return self.WaypointsAndConnection[0]
+        else:
+            return None
+
+
+    def PeekConnectivity(self):
+        if(not self._empty()):
+            tuple = self.WaypointsAndConnection[0]
+            return tuple[1]
+        else:
+            return None
+
+
+    def BackTrackPathForConnectivity(self):
+        Connected = 0
+        StartingLocation = self.StackPop()
+        StepsBack = []
+        StepsForward = []
+        tasks = []
+        StepsForward.insert(0,StartingLocation)
+        while((not Connected)and (not self._empty())):
+            if(self.PeekConnectivity()):
+                Step = self.StackPop()
+                #print("Step Popped: "+ str(Step))
+                StepsBack.append(Step)
+                Connected = 1
+            else:
+                Step = self.StackPop()
+                #print("Step Popped: "+ str(Step))
+                StepsBack.append(Step)
+                StepsForward.insert(0,Step)
+        if(self._empty() and (not Connected)):
+            print("BackTrackError1")
+            return None
+        else:
+            StepsBack.extend(StepsForward)
+            return StepsBack
+
+
+
+            
+    def PrintWorkingHistory(self):
+        print("History:")
+        print("TrueCount: "+ str(self.TrueCount))
+        print("Working Count: "+ str(self.Count))
+        for tuple in self.TrueWaypointsAndConnection:
+            print("ID: "+ str(tuple[2]) + " Position: "+ str(tuple[0])+ " Connected: "+ str(bool(tuple[1])))
+
+
+    def PrintListOfStepsGeneric(self,list):
+        for tuple in list:
+            print("ID: "+ str(tuple[2]) + " Position: "+ str(tuple[0])+ " Connected: "+ str(bool(tuple[1])))
 
 
 class TaskQueue(object):
@@ -579,12 +670,16 @@ class TaskQueue(object):
 
 
 class TaskPenaltyTracker(object):
-    def __init__(self, Q:TaskQueue, watchDog:WatchDog):
+    def __init__(self, Q:TaskQueue, watchDog:WatchDog,wph:WaypointHistory):
         
         self.taskID = list()    
         self.taskStatus = list()    
         self.taskDelay = list()   
-        totalEstimatedTripTime = self.GetTotalExecutedTime(watchDog)
+        memo = dict()
+        wph_copy = wph.__deepcopy__(memo)
+        Q_copy = Q.__deepcopy__(memo)
+        totalExecutedTripTime = self.GetTotalExecutedTime(watchDog)
+        
         for t in Q.queue:
             if(t.comms_required):
                 self.AddTask(t.uniqueID)
@@ -633,8 +728,40 @@ class TaskPenaltyTracker(object):
             
             start = previousLocation
             end = a.Position
-            self.DelayEstimator(start,end,a.Task)
+            total = total + self.DelayEstimator(start,end,a.Task)
             previousLocation = end
+        return total
+    
+    def BackstepCost(self,wph:WaypointHistory,Q:TaskQueue):
+        x=0
+        startingPosition =  nextTask.position
+        backSteps = wph.BackTrackPathForConnectivity()
+        taskConversion = []
+        nextTask:Task = Q.NextTask()
+        start:Position = startingPosition
+        end:Position = startingPosition
+        total = 0
+        backSteps.reverse()
+        connectionReached = False
+        for idx, waypoint in enumerate(backSteps):
+            while(not connectionReached):
+                end = waypoint[0]
+                if(waypoint[1]):
+                    #print("Appending Next Task!")
+                    total = total + self.DelayEstimator(start,end,"SEND_DATA")
+                    connectionReached = True
+                else:
+                    total = total + self.DelayEstimator(start,end,"FLIGHT")
+                startingPosition = end
+
+        return total
+
+        
+
+        
+
+
+
             
     
         
@@ -699,98 +826,7 @@ class TaskPenaltyNormalizer(object):
             
 
 
-class WaypointHistory(object):
-    def __init__(self):
-        self.TrueWaypointsAndConnection =[]
-        self.WaypointsAndConnection = []#list of Tuples (waypoint,connection_status,id)
-        self.Count = 0
-        self.TrueCount = 0
-    def _empty(self):
-        if(self.Count<1):
-            return 1
-        else:
-            return 0
 
-
-    def __deepcopy__(self, memo):
-        #print('Class'+ str(self.__class__))
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, copy.deepcopy(v, memo))
-        return result
-
-    def AddPoint(self,Waypoint,Connected):#compresses into tuple
-        self.WaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
-        self.TrueWaypointsAndConnection.insert(0,(Waypoint,Connected,self.TrueCount))
-        self.Count = self.Count + 1
-        self.TrueCount = self.TrueCount + 1
-
-    def StackPop(self):#return tuple
-        if(not self._empty()):
-            self.Count = self.Count - 1
-            return self.WaypointsAndConnection.pop(0)
-
-        else:
-            return None
-
-    def Peek(self):
-
-
-        if(not self._empty()):
-            return self.WaypointsAndConnection[0]
-        else:
-            return None
-
-
-    def PeekConnectivity(self):
-        if(not self._empty()):
-            tuple = self.WaypointsAndConnection[0]
-            return tuple[1]
-        else:
-            return None
-
-
-    def BackTrackPathForConnectivity(self):
-        Connected = 0
-        StartingLocation = self.StackPop()
-        StepsBack = []
-        StepsForward = []
-        tasks = []
-        StepsForward.insert(0,StartingLocation)
-        while((not Connected)and (not self._empty())):
-            if(self.PeekConnectivity()):
-                Step = self.StackPop()
-                #print("Step Popped: "+ str(Step))
-                StepsBack.append(Step)
-                Connected = 1
-            else:
-                Step = self.StackPop()
-                #print("Step Popped: "+ str(Step))
-                StepsBack.append(Step)
-                StepsForward.insert(0,Step)
-        if(self._empty() and (not Connected)):
-            print("BackTrackError1")
-            return None
-        else:
-            StepsBack.extend(StepsForward)
-            return StepsBack
-
-
-
-            
-    def PrintWorkingHistory(self):
-        print("History:")
-        print("TrueCount: "+ str(self.TrueCount))
-        print("Working Count: "+ str(self.Count))
-        for tuple in self.TrueWaypointsAndConnection:
-            print("ID: "+ str(tuple[2]) + " Position: "+ str(tuple[0])+ " Connected: "+ str(bool(tuple[1])))
-
-
-    def PrintListOfStepsGeneric(self,list):
-        for tuple in list:
-            print("ID: "+ str(tuple[2]) + " Position: "+ str(tuple[0])+ " Connected: "+ str(bool(tuple[1])))
 
 
 
@@ -1398,7 +1434,7 @@ class PredictiveTree(object):
 
 
 
-            #this ~if~ block seems redundant and wrong?
+            #this ~if~ block seems redundant?
             if(self.ActionableTask(Q.Peek(),self.Status.Connected)):#Can we changes this to 100% Certainity only? THIS BLOCK ASSUMES task `t` has ~100%
                 t:Task = Q.PopTask()
                 previousPosition = currentPosition
@@ -1425,8 +1461,6 @@ class PredictiveTree(object):
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
                 n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
                 n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
-                # n_P.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
-                # n_F.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 currentNode.Adopt(n_P)
                 currentNode.Adopt(n_F)
                 currentNode = n
