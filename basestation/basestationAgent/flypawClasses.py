@@ -633,7 +633,7 @@ class TaskPenaltyTracker(object):
             
             start = previousLocation
             end = a.Position
-            self.DelayEstimator(start,end)
+            self.DelayEstimator(start,end,a.Task)
             previousLocation = end
             
     
