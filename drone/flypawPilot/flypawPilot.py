@@ -196,7 +196,7 @@ class FlyPawPilot(StateMachine):
         else:
             print("number of missions: " + str(len(self.missions)))
             self.processMissions()
-            self.WatchDog.Normal = TaskPenaltyNormalizer(self.taskQ)
+            #self.WatchDog.Normal = TaskPenaltyNormalizer(self.taskQ)
             self.WatchDog.StartingPosition = getCurrentPosition(drone)
             self.taskQ.PrintQ()
             
