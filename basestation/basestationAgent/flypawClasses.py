@@ -702,7 +702,7 @@ class TaskPenaltyTracker(object):
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
         if(self.taskStatus[index]=="NOT-HALTED"):
-            self.ShortestTransmission[index] = self.BackstepCost(wph,Q)
+            self.ShortestTransmission[index] = self.BackstepCost(wph,Q) + self.taskDelay[index]
         else:
             x=0
       
