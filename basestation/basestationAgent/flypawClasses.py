@@ -1160,7 +1160,6 @@ class PredictiveTree(object):
         now = datetime.now()
         current_timestring = now.strftime("%Y%m%d-%H%M%S")
         branches = 0
-        penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
         self.Solutions= list()
         memo_sol = dict()
         for i, n in enumerate(self.Nodes):
@@ -1192,7 +1191,6 @@ class PredictiveTree(object):
     def BuildSolutionObject(self):
         now = datetime.now()
         branches = 0
-        penaltyNormalizer = TaskPenaltyNormalizer(self.UnmodifiedTaskQ)
         self.Solutions= list()
         solutionHolder = list()
         solutionConfidences = list()
