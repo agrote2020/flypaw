@@ -412,6 +412,8 @@ class SpeculativeProduct(object):
         self.Confidences = list()
         self.Delays = list()
         self.SolutionsCount  = 0
+        self.Specifications = list()
+        
 
     def Recommend(self):
         priority = self.Priority
@@ -1124,6 +1126,7 @@ class PredictiveTree(object):
         solutionHolder = list()
         solutionConfidences = list()
         solutionDelays = list()
+        specificationList = list()
         memo_sol = dict()
         for i, n in enumerate(self.Nodes):
             if(not (n.Children.__len__())):
@@ -1140,7 +1143,7 @@ class PredictiveTree(object):
             print("Confidence:"+ str(c))
             actionList = self.GetBranchActionList(branch)
             #p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
-            p_norm = n.PenaltyTracker
+            p_norm:TaskPenaltyTracker = n.PenaltyTracker
             soln.OptionNumber = i
             soln.Confidence = c
             soln.DecisionStack = n.DecisionStack
@@ -1151,6 +1154,7 @@ class PredictiveTree(object):
             solutionHolder.append(soln)
             solutionConfidences.append(c)
             solutionDelays.append(p_norm)
+            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay})
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
@@ -1158,6 +1162,7 @@ class PredictiveTree(object):
         spec.Confidences = solutionConfidences
         spec.Delays = solutionDelays
         spec.SolutionsCount = spec.Solutions.__len__()
+        spec.Specifications = specificationList
         spec.Recommend()
         
         return spec
@@ -1383,8 +1388,8 @@ class PredictiveTree(object):
                 finish = Q.Empty()
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
-                # n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
-                # n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
+                n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
+                n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
                 # n_P.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 # n_F.DecisionStack.append("Task: "+str(Q.Peek().uniqueID)+"~LOF")#Leap of faith! P/F
                 currentNode.Adopt(n_P)
