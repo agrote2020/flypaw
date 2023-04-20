@@ -649,6 +649,7 @@ class TaskPenaltyNormalizer(object):
             t = self.Q.PopTask()
             self.Base.Penalize(t,prevPosition)
             prevPosition = currentPosition
+        print("Penalty Normalizer:")
         self.Base.Print()
 
     def Normailze(self,PenaltyTracker:TaskPenaltyTracker):
@@ -1138,7 +1139,8 @@ class PredictiveTree(object):
             c = self.GetBranchConfidence(branch)
             print("Confidence:"+ str(c))
             actionList = self.GetBranchActionList(branch)
-            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
+            #p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
+            p_norm = n.PenaltyTracker
             soln.OptionNumber = i
             soln.Confidence = c
             soln.DecisionStack = n.DecisionStack
@@ -1148,7 +1150,7 @@ class PredictiveTree(object):
             soln.Penalty = p_norm
             solutionHolder.append(soln)
             solutionConfidences.append(c)
-            solutionDelays.append(p_norm.TotalDelay())
+            solutionDelays.append(p_norm)
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
