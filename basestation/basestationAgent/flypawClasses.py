@@ -336,7 +336,7 @@ class WatchDog(object):
                 lastTime = self.ActionTimeStamps.get(str(k))
                 penalty = 0
                 if(t.comms_required):
-                    penalty = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+                    penalty = self.ActionTimeStamps.get(str(k)) - self.WatchdogStartStamp 
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
@@ -674,26 +674,43 @@ class TaskPenaltyTracker(object):
         
         self.taskID = list()    
         self.taskStatus = list()    
-        self.taskDelay = list()   
+        self.taskDelay = list()
+        self.ShortestTransmission = list()
         memo = dict()
-        wph_copy = wph.__deepcopy__(memo)
-        Q_copy = Q.__deepcopy__(memo)
+
         totalExecutedTripTime = self.GetTotalExecutedTime(watchDog)
         
         for t in Q.queue:
             if(t.comms_required):
-                self.AddTask(t.uniqueID)
+                self.AddTaskWithDelay(t.uniqueID,totalExecutedTripTime)
 
     def AddTask(self, TaskID):
         if( (self.FindTaskByID(TaskID)==-1)):
             self.taskID.append(TaskID)
-            self.taskStatus.append("HANGING")
-            self.taskDelay.append(0)
+            self.taskStatus.append("NOT-HALTED")
+            self.taskDelay.append()
+
+
+
+    def AddTaskWithDelay(self, TaskID, delay):
+        if( (self.FindTaskByID(TaskID)==-1)):
+            self.taskID.append(TaskID)
+            self.taskStatus.append("NOT-HALTED")
+            self.taskDelay.append(delay)
+            self.ShortestTransmission.append(-1) 
+
+    def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
+        index = self.FindTaskByID(TaskID)
+        if(self.taskStatus=="NOT-HALTED"):
+            self.ShortestTransmission[index] = self.BackstepCost(wph,Q)
+        else:
+            x=0
+      
 
     def Penalize(self,leadingAction:Task, previousLocation:Position):
         ActionTimeEstimate = self.DelayEstimatorOLD(leadingAction,previousLocation)
         for i, t in enumerate(self.taskID):
-            if(self.taskStatus[i]=="HANGING"):
+            if((self.taskStatus[i]=="HANGING")or(self.taskStatus=="NOT-HALTED")):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
             if(leadingAction.uniqueID==self.taskID[i]):
                 self.taskStatus[i] = "COMPLETE"
@@ -718,6 +735,10 @@ class TaskPenaltyTracker(object):
                 index = i
         return index
     
+    def AnalyzeTaskCost(self,wph_origin:WaypointHistory,Q:TaskQueue):
+        x=0
+        x =self.BackstepCost(wph_origin,Q)
+
     def GetTotalExecutedTime(self,wd:WatchDog):
         x=0
         actions = wd.GetActionList()
@@ -732,27 +753,30 @@ class TaskPenaltyTracker(object):
             previousLocation = end
         return total
     
-    def BackstepCost(self,wph:WaypointHistory,Q:TaskQueue):
+    def BackstepCost(self,wph_origin:WaypointHistory,Q:TaskQueue):
         x=0
-        startingPosition =  nextTask.position
+        memo = dict()
+        wph:WaypointHistory = wph_origin.__deepcopy__(memo)
+
         backSteps = wph.BackTrackPathForConnectivity()
-        taskConversion = []
         nextTask:Task = Q.NextTask()
+        startingPosition =  nextTask.position
         start:Position = startingPosition
         end:Position = startingPosition
         total = 0
         backSteps.reverse()
         connectionReached = False
-        for idx, waypoint in enumerate(backSteps):
-            while(not connectionReached):
-                end = waypoint[0]
-                if(waypoint[1]):
-                    #print("Appending Next Task!")
-                    total = total + self.DelayEstimator(start,end,"SEND_DATA")
-                    connectionReached = True
-                else:
-                    total = total + self.DelayEstimator(start,end,"FLIGHT")
-                startingPosition = end
+        for waypoint in backSteps:
+
+            end = waypoint[0]
+            if(waypoint[1]):
+                #print("Appending Next Task!")
+                total = total + self.DelayEstimator(start,end,"SEND_DATA")
+                connectionReached = True
+                break
+            else:
+                total = total + self.DelayEstimator(start,end,"FLIGHT")
+            startingPosition = end
 
         return total
 
@@ -963,6 +987,11 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
             return None
         else:
             return self.DecisionStack[self.DecisionStack.__len__()]
+        
+    def PenaltyHalt(self):
+        x=0
+        nextTask:Task = self.Q.NextTask()
+        self.PenaltyTracker.HaltTask(nextTask.uniqueID,self.TravelHistory,self.Q)
 
 
 
@@ -1474,6 +1503,7 @@ class PredictiveTree(object):
         if(HaltNode.Finish):
             return
         else:
+            HaltNode.PenaltyHalt()
             BlockTreeHalt = self.Block(HaltNode)
             #print('BLOCK-ADOPTED')
 
