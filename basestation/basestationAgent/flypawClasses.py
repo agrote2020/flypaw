@@ -1154,7 +1154,7 @@ class PredictiveTree(object):
             solutionHolder.append(soln)
             solutionConfidences.append(c)
             solutionDelays.append(p_norm)
-            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay})
+            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay()})
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
