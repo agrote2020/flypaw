@@ -197,6 +197,7 @@ class FlyPawPilot(StateMachine):
             print("number of missions: " + str(len(self.missions)))
             self.processMissions()
             self.WatchDog.Normal = TaskPenaltyNormalizer(self.taskQ)
+            self.WatchDog.StartingPosition = getCurrentPosition(drone)
             self.taskQ.PrintQ()
             
 
@@ -1074,7 +1075,7 @@ class FlyPawPilot(StateMachine):
                 f.write(JSON_DUMP_WPH)
             
             speculation =  SpeculativeProduct()
-            pt = TaskPenaltyTracker(self.taskQ)
+            pt = TaskPenaltyTracker(self.taskQ,self.WatchDog)
             root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
             tree:PredictiveTree = PredictiveTree(root)
             tree.HaltPoint(False)

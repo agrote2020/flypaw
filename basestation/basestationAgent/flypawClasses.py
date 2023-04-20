@@ -273,6 +273,17 @@ class WatchDog(object):
         self.ExecutionOrderGenerator = IDGenerator()
         self.Normal:TaskPenaltyNormalizer = None
         self.LastTimeStamp = None
+        self.StartingPosition = None
+
+    def GetStartingPosition(self):
+
+        if(self.StartingPosition==None):
+            self.StartingPosition = Position()
+            self.StartingPosition.InitParams(-78.69611, 35.727279,0,0,0,0)
+            return self.StartingPosition
+        else:
+            return self.StartingPosition
+
 
     def InitStopwatches(self,criticalTasks:list):
         x=0
@@ -314,7 +325,7 @@ class WatchDog(object):
     def Print(self):
         for k in self.keys:
             print("Task ID: "+ str(k)+ " Action: "+ str(self.Actions.get(k).task))
-
+    #OBSOLETE FIX TO MATCH GE ACTION LIST
     def DumpReport(self):
         records = list()
         lastTime = 0
@@ -348,7 +359,6 @@ class WatchDog(object):
             f.write(JSON_DUMP_LIST)
         for j in self.Actions.keys():
             keyType = type(j)
-        print("KEY_TYPE")
 
         for k in self.keys:
 
@@ -569,12 +579,12 @@ class TaskQueue(object):
 
 
 class TaskPenaltyTracker(object):
-    def __init__(self, Q:TaskQueue):
+    def __init__(self, Q:TaskQueue, watchDog:WatchDog):
         
         self.taskID = list()    
         self.taskStatus = list()    
         self.taskDelay = list()   
-        
+        totalEstimatedTripTime = self.GetTotalExecutedTime(watchDog)
         for t in Q.queue:
             if(t.comms_required):
                 self.AddTask(t.uniqueID)
@@ -586,7 +596,7 @@ class TaskPenaltyTracker(object):
             self.taskDelay.append(0)
 
     def Penalize(self,leadingAction:Task, previousLocation:Position):
-        ActionTimeEstimate = self.DelayEstimator(leadingAction,previousLocation)
+        ActionTimeEstimate = self.DelayEstimatorOLD(leadingAction,previousLocation)
         for i, t in enumerate(self.taskID):
             if(self.taskStatus[i]=="HANGING"):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
@@ -612,11 +622,36 @@ class TaskPenaltyTracker(object):
             if(self.taskID[i]==id):
                 index = i
         return index
-    def DelayEstimator(self,action:Task, prev:Position):
+    
+    def GetTotalExecutedTime(self,wd:WatchDog):
+        x=0
+        actions = wd.GetActionList()
+        a:ActionRecord
+        previousLocation = wd.GetStartingPosition()
+        total =0
+        for i,a in enumerate(actions):
+            
+            start = previousLocation
+            end = a.Position
+            self.DelayEstimator(start,end)
+            previousLocation = end
+            
+    
+        
+
+    def DelayEstimatorOLD(self,action:Task, prev:Position):
         speed = 10 #m/s
         if(action.task=="FLIGHT"):
             start:Position = prev
             end:Position = action.position
+            geo = Geodesic.WGS84.Inverse(start.lat, start.lon, end.lat,end.lon)
+            distance = geo.get('s12')
+            return distance/speed
+        else:
+            return 1.0
+    def DelayEstimator(self,start:Position, end:Position,task:str):
+        speed = 10 #m/s
+        if(task=="FLIGHT"):
             geo = Geodesic.WGS84.Inverse(start.lat, start.lon, end.lat,end.lon)
             distance = geo.get('s12')
             return distance/speed
@@ -1154,7 +1189,7 @@ class PredictiveTree(object):
             solutionHolder.append(soln)
             solutionConfidences.append(c)
             solutionDelays.append(p_norm)
-            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay()})
+            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay(),"DISTANCE":soln.Distance})
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
@@ -1173,7 +1208,7 @@ class PredictiveTree(object):
         for i, n in enumerate(branch):
                 
             print("Node: "+ str(i))    
-            tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
+            tte = n.PenaltyTracker.DelayEstimatorOLD(n.LeadingTask,n.Position) ##This is probably wrong
             print("TimeToExecute: "+ str(tte))    
             print("Leading Task: "+ n.LeadingTask.task)    
             print("Decsion Stack: "+ str(n.DecisionStack))    
@@ -1195,7 +1230,7 @@ class PredictiveTree(object):
                 
                 if( i < (branch.__len__()-2 )):
                     pos:Position = branch[i].Position
-                    tte = n.PenaltyTracker.DelayEstimator(n.LeadingTask,n.Position) ##This is probably wrong
+                    tte = n.PenaltyTracker.DelayEstimatorOLD(n.LeadingTask,n.Position) ##This is probably wrong
                     d = n.DecisionStack 
                     p = n.PenaltyTracker
                     action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,p,d,n.Confidence)

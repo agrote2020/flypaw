@@ -48,8 +48,7 @@ with open(dump_id_path,'r') as f:
 
 t = tq.NextTask()
 wd.DumpReport()
-pt = TaskPenaltyTracker(tq)
-norm = TaskPenaltyNormalizer(tq)
+pt = TaskPenaltyTracker(tq,wd)
 emptyList = list()
 root:Node =  Node(0,tq,t,0,0,wph,id,emptyList,pt,1.0)
 tree:PredictiveTree = PredictiveTree(root)
