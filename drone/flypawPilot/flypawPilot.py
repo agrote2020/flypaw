@@ -1075,7 +1075,7 @@ class FlyPawPilot(StateMachine):
                 f.write(JSON_DUMP_WPH)
             
             speculation =  SpeculativeProduct()
-            pt = TaskPenaltyTracker(self.taskQ,self.WatchDog)
+            pt = TaskPenaltyTracker(self.taskQ,self.WatchDog,self.WaypointHistory)
             root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
             tree:PredictiveTree = PredictiveTree(root)
             tree.HaltPoint(False)
