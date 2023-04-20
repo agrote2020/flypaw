@@ -379,7 +379,7 @@ class WatchDog(object):
                 lastTime = self.ActionTimeStamps.get(k_itr)
                 penalty = 0
                 if(t.comms_required):
-                    penalty = self.ActionTimeStamps.get(k_itr) - self.WatchdogStartStamp - self.Normal.Base.FindTaskByID(t.uniqueID)
+                    penalty = self.ActionTimeStamps.get(k_itr) - self.WatchdogStartStamp
                 rec = ActionRecord(d_time,t.task,t.position,penalty,"",100)
                 records.append(rec)
             else:
