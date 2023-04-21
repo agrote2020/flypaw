@@ -703,6 +703,7 @@ class TaskPenaltyTracker(object):
         index = self.FindTaskByID(TaskID)
         if(self.taskStatus[index]=="NOT-HALTED"):
             self.ShortestTransmission[index] = self.BackstepCost(wph,Q) + self.taskDelay[index]
+            self.taskStatus[index]="HANGING"
         else:
             x=0
 
@@ -717,9 +718,9 @@ class TaskPenaltyTracker(object):
             if(leadingAction.uniqueID==self.taskID[i]):
 
                 self.taskStatus[i] = "COMPLETE"
-                # if(self.taskStatus[i] == "NOT-HALTED"):
-                #     x=0
-                #     self.ShortestTransmission[i] =  self.taskDelay[i]
+                if(self.taskStatus[i] == "NOT-HALTED"):
+                    x=0
+                    self.ShortestTransmission[i] =  self.taskDelay[i]
 
     def Print(self):
         #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
