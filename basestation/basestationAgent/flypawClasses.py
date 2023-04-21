@@ -697,7 +697,7 @@ class TaskPenaltyTracker(object):
             self.taskID.append(TaskID)
             self.taskStatus.append("NOT-HALTED")
             self.taskDelay.append(delay)
-            self.ShortestTransmission.append(-1) 
+            self.ShortestTransmission.append(0) 
 
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
@@ -992,6 +992,9 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         x=0
         nextTask:Task = self.Q.NextTask()
         self.PenaltyTracker.HaltTask(nextTask.uniqueID,self.TravelHistory,self.Q)
+    def PenaltyComplete(self):
+        x=0
+
 
 
 
@@ -1184,38 +1187,6 @@ class PredictiveTree(object):
         else:
             return self.GetRoot(self.NodeMap[n.Parent])
         
-
-    def BranchAnalyze(self):
-        now = datetime.now()
-        current_timestring = now.strftime("%Y%m%d-%H%M%S")
-        branches = 0
-        self.Solutions= list()
-        memo_sol = dict()
-        for i, n in enumerate(self.Nodes):
-            if(not (n.Children.__len__())):
-                branches = branches + 1
-                self.BranchEnds.append(n.ID)
-                self.BranchNodes.append(n)
-        print("Branches: "  + str(self.BranchEnds))
-        for i, n in enumerate(self.BranchNodes):
-            branch = self.GetFullBranch(n)
-            d = self.GetBranchDistance(branch)
-            c = self.GetBranchConfidence(branch) 
-            print("")
-            print("Option#: "+ str(i))
-            print("Distance: "+str(d)+" m")
-            print("Confidence: "+str(c)+" %")
-            print("Decisions: "+ str(n.DecisionStack))
-            print("")
-            print("CONNECTION DEPENDENT TASK PENALTIES (s)")
-            print("======================================")
-            p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker).Print()
-            print("********************************************************************************")
-            solution = HaltSolution(i,self.BranchEnds[i],c,d,p_norm,n.DecisionStack)
-            self.Solutions.append(solution.__deepcopy__(memo_sol))
-            JSON_DUMP_TASK = jsonpickle.encode(self.Solutions)
-            with open('solutions'+current_timestring +'.txt','w') as f:
-                f.write(JSON_DUMP_TASK)
 
     def BuildSolutionObject(self):
         now = datetime.now()
@@ -1485,6 +1456,11 @@ class PredictiveTree(object):
                 probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 finish = Q.Empty()
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
+
+                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                print("NT: " + str(Q.NextTask().task))
+                print("LT: " + str(LeadingTask.task))
+                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
                 n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
                 n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
