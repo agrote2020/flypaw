@@ -1456,8 +1456,11 @@ class PredictiveTree(object):
                 probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 finish = Q.Empty()
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
+
+                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
                 print("NT: " + str(Q.NextTask().task))
                 print("LT: " + str(LeadingTask.task))
+                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
                 n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
                 n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
