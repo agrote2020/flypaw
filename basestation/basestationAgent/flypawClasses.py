@@ -676,6 +676,7 @@ class TaskPenaltyTracker(object):
         self.taskStatus = list()    
         self.taskDelay = list()
         self.ShortestTransmission = list()
+        self.Penalties = list()
         memo = dict()
 
         totalExecutedTripTime = self.GetTotalExecutedTime(watchDog)
@@ -698,6 +699,7 @@ class TaskPenaltyTracker(object):
             self.taskStatus.append("NOT-HALTED")
             self.taskDelay.append(delay)
             self.ShortestTransmission.append(delay) 
+            self.Penalties.append(-1)
 
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
@@ -742,10 +744,6 @@ class TaskPenaltyTracker(object):
                 index = i
         return index
     
-    def AnalyzeTaskCost(self,wph_origin:WaypointHistory,Q:TaskQueue):
-        x=0
-        x =self.BackstepCost(wph_origin,Q)
-
     def GetTotalExecutedTime(self,wd:WatchDog):
         x=0
         actions = wd.GetActionList()
@@ -786,6 +784,17 @@ class TaskPenaltyTracker(object):
             startingPosition = end
 
         return total
+    
+    def AnalyzePenalty(self):
+        total=0
+        for i, t in enumerate(self.taskID):
+            
+            self.Penalties[i] = self.taskDelay[i]-self.ShortestTransmission[i]     
+            total = total + self.Penalties[i]
+
+        return total
+
+
 
         
 
@@ -819,6 +828,12 @@ class TaskPenaltyTracker(object):
     def TotalDelay(self):
         total = 0
         for d in self.taskDelay:
+            total = d + total
+        return total
+    
+    def TotalPenalty(self):
+        total = 0
+        for d in self.Penalties:
             total = d + total
         return total
         
@@ -1223,6 +1238,7 @@ class PredictiveTree(object):
             actionList = self.GetBranchActionList(branch)
             #p_norm = penaltyNormalizer.Normailze(n.PenaltyTracker)
             p_norm:TaskPenaltyTracker = n.PenaltyTracker
+            totalPenalty = p_norm.AnalyzePenalty()
             soln.OptionNumber = i
             soln.Confidence = c
             soln.DecisionStack = n.DecisionStack
@@ -1233,7 +1249,7 @@ class PredictiveTree(object):
             solutionHolder.append(soln)
             solutionConfidences.append(c)
             solutionDelays.append(p_norm)
-            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_DELAY":p_norm.TotalDelay(),"DISTANCE":soln.Distance})
+            specificationList.append({"DECISION_STACK":n.DecisionStack,"CONFIDENCE_METRIC":c,"TOTAL_Penalty":totalPenalty,"DISTANCE":soln.Distance})
 
         spec = SpeculativeProduct()
         spec.Priority = self.Priority
