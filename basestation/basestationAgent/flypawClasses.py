@@ -716,10 +716,10 @@ class TaskPenaltyTracker(object):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
             if(leadingAction.uniqueID==self.taskID[i]):
 
-                if(self.taskStatus[i] == "NOT-HALTED"):
-                    x=0
-                    self.ShortestTransmission[i] =  self.taskDelay[i]
                 self.taskStatus[i] = "COMPLETE"
+                # if(self.taskStatus[i] == "NOT-HALTED"):
+                #     x=0
+                #     self.ShortestTransmission[i] =  self.taskDelay[i]
 
     def Print(self):
         #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
