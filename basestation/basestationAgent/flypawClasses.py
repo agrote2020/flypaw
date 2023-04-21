@@ -697,7 +697,7 @@ class TaskPenaltyTracker(object):
             self.taskID.append(TaskID)
             self.taskStatus.append("NOT-HALTED")
             self.taskDelay.append(delay)
-            self.ShortestTransmission.append(0) 
+            self.ShortestTransmission.append(delay) 
 
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
@@ -705,15 +705,19 @@ class TaskPenaltyTracker(object):
             self.ShortestTransmission[index] = self.BackstepCost(wph,Q) + self.taskDelay[index]
         else:
             x=0
+
+    
       
 
     def Penalize(self,leadingAction:Task, previousLocation:Position):
         ActionTimeEstimate = self.DelayEstimatorOLD(leadingAction,previousLocation)
         for i, t in enumerate(self.taskID):
+            if(leadingAction.uniqueID==self.taskID[i]):
+                if(self.taskStatus[i]=="NOT-HALTED"):
+                    self.ShortestTransmission[i] =  self.taskDelay[i]
+                self.taskStatus[i] = "COMPLETE"
             if((self.taskStatus[i]=="HANGING")or(self.taskStatus[i]=="NOT-HALTED")):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
-            if(leadingAction.uniqueID==self.taskID[i]):
-                self.taskStatus[i] = "COMPLETE"
 
     def Print(self):
         #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
@@ -994,6 +998,9 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         self.PenaltyTracker.HaltTask(nextTask.uniqueID,self.TravelHistory,self.Q)
     def PenaltyComplete(self):
         x=0
+        nextTask:Task = self.Q.NextTask()
+        self.PenaltyTracker.Penalize(nextTask)
+
 
 
 
@@ -1456,11 +1463,11 @@ class PredictiveTree(object):
                 probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 finish = Q.Empty()
                 n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
-
-                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-                print("NT: " + str(Q.NextTask().task))
-                print("LT: " + str(LeadingTask.task))
-                print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                #tHIS appear to reveal some issue...both shouldn't have been send_data here...double stack?
+                # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                # print("NT: " + str(Q.NextTask().task))
+                # print("LT: " + str(LeadingTask.task))
+                # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
                 n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
                 n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
                 n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
