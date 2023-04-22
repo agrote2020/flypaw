@@ -49,7 +49,7 @@ with open(dump_id_path,'r') as f:
 t = tq.NextTask()
 wd.DumpReport()
 pt = TaskPenaltyTracker(tq,wd,wph)
-pt.AnalyzeTaskCost(wph,tq)
+# pt.AnalyzeTaskCost(wph,tq)
 emptyList = list()
 root:Node =  Node(0,tq,t,0,0,wph,id,emptyList,pt,1.0)
 tree:PredictiveTree = PredictiveTree(root)
@@ -67,27 +67,6 @@ JSON_DUMP_TASK = jsonpickle.encode(exper,unpicklable=False,indent=True)
 with open('experimentDebug.json','w') as f:
     f.write(JSON_DUMP_TASK)
 
-#tree.BranchAnalyze()
 
-
-
-
-
-
-
-""" sw = TaskStopwatch(tq.NextTask())
-sw.StartWatch()
-time.sleep(3.5)
-sw.StopWatch()
-print("time: "+str(sw.GetTime())) """
-
-#tree.BranchDistances()
-#tree.DELAY_PRINT_TEST()
-
-
-
-#print("empty?"+str(bool(wy._empty())))
-#if(not wy._empty()):
-#    print("wrong")
 
 

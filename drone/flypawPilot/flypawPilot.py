@@ -436,6 +436,9 @@ class FlyPawPilot(StateMachine):
         JSON_DUMP_ID_GEN = jsonpickle.encode(self.TaskIDGen)
         with open('json_dump_id.txt','w') as f:
             f.write(JSON_DUMP_ID_GEN)
+        JSON_DUMP_WD = jsonpickle.encode(self.WatchDog)
+        with open('dump_watchdog.json','w') as f:
+            f.write(JSON_DUMP_WD)
 
 
 
