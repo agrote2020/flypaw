@@ -950,7 +950,7 @@ class RadioMap(object):
 
 
 class Node(object):#Interdependent PredictiveTree Class, can exist without one, but its hopelessly lost  :(
-    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator,decisionStack:list,penalty:TaskPenaltyTracker,confidence:float):#this contructor is getting to long.... >:(
+    def __init__(self,ID_num,q:TaskQueue,task:Task,finish,connected,waypointHistory:WaypointHistory, id_gen:TaskIDGenerator,decisionStack:list,penalty:TaskPenaltyTracker,confidence:float,callingOrigin:str):#this contructor is getting to long.... >:(
         self.q_memo = dict()
         self.id_memo = dict()
         self.wph_memo = dict()
@@ -969,7 +969,7 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         self.DecisionStack = copy.deepcopy(decisionStack,self.ds_memo)
         self.PenaltyTracker = penalty.__deepcopy__(self.pt_memo)
         self.Confidence = confidence
-
+        self.CallingOrigin = callingOrigin
 
 
 
@@ -1141,7 +1141,7 @@ class PredictiveTree(object):
         self.Root.Parent = -1
         #self.Root.ID = self.ID_Gen.Get()
         r = self.Root
-        self.NewNode(r.Q,r.LeadingTask,r.Finish,r.Connected,r.TravelHistory,r.ID_GEN,r.DecisionStack,r.PenaltyTracker,1.0)
+        self.NewNode(r.Q,r.LeadingTask,r.Finish,r.Connected,r.TravelHistory,r.ID_GEN,r.DecisionStack,r.PenaltyTracker,1.0,"START")
         self.Status.Update(r.LeadingTask.position,r.Connected)
 
     def PrintNodes(self):
@@ -1164,11 +1164,12 @@ class PredictiveTree(object):
 
 
 
-    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory,id_gen:TaskIDGenerator,ds:list,pt:TaskPenaltyTracker,con:float):#deines a new node and adds it to the list of nodes
+    def NewNode(self,taskQ:TaskQueue,t:Task,finish,connected,prevWaypointHistory:WaypointHistory,id_gen:TaskIDGenerator,ds:list,pt:TaskPenaltyTracker,con:float,calledFrom:str):#deines a new node and adds it to the list of nodes
 
         memo_id = dict()
 
         id  =  self.ID_Gen.Get()
+        call = calledFrom
 
         if(id==0):
             x=0
@@ -1177,7 +1178,7 @@ class PredictiveTree(object):
 
         if(t.task=="FLIGHT"):
             prevWaypointHistory.AddPoint(t.position,connected)
-        newNode = Node(id,taskQ,t,finish,connected,prevWaypointHistory,id_gen_cpy,ds,pt,con)
+        newNode = Node(id,taskQ,t,finish,connected,prevWaypointHistory,id_gen_cpy,ds,pt,con,call)
         self.Nodes.append(newNode)
         self.NodeMap[newNode.ID] = newNode
         
@@ -1394,8 +1395,9 @@ class PredictiveTree(object):
  
             if(waypoint[1]):
                 #print("Appending Next Task!")
+                nextTask.ChangePosition(waypoint[0])
                 taskConversion.append(nextTask)
-            t = Task(waypoint[0],"FLIGHT",0,0,node.ID_GEN)
+            t = Task(waypoint[0],"FLIGHT",0,0,node.ID_GEN.Get())
             t.dynamicTask = True
             #print("TASK ID: "+str(waypoint[2])) 
             taskConversion.append(t)
@@ -1408,7 +1410,7 @@ class PredictiveTree(object):
         Q.AppendTasks(taskConversion)
 
 
-        n = self.NewNode(Q,t,False,False,wph,node.ID_GEN,node.DecisionStack,node.PenaltyTracker,1.0)
+        n = self.NewNode(Q,t,False,False,wph,node.ID_GEN,node.DecisionStack,node.PenaltyTracker,1.0,"BACKSTEP")
         n.DecisionStack.append("BLOCK")
         # n.DecisionStack.append("Task: "+str(nextTask.uniqueID)+"~BLOCK")
         #n.PenaltyTracker.AddTask(nextTask.uniqueID)
@@ -1468,12 +1470,12 @@ class PredictiveTree(object):
                 nextLocationConnected = self.ConnectionThreshold(t.position,1.00)
                 finish = Q.Empty()
                 if(not finish):
-                    probabilty = self.ConnectionProbabilty(Q.Peek().position)
+                    probabilty = self.ConnectionProbabilty(Q.Peek().position)#nothing really happens with this here
 
-                if(nextLocationConnected):
-                    self.CheckHold(Q)   
 
-                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0)
+                self.CheckHold(Q)   
+
+                n = self.NewNode(Q,t,finish,nextLocationConnected,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0,"CONTINUE")
                 LeadingTask = t
                 n.PenaltyTracker.Penalize(t,previousPosition)
                 currentNode.Adopt(n)
@@ -1483,13 +1485,13 @@ class PredictiveTree(object):
             else:
                 probabilty = self.ConnectionProbabilty(Q.Peek().position)
                 finish = Q.Empty()
-                n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty)
+                n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty,"LOF:PASS")
                 #tHIS appear to reveal some issue...both shouldn't have been send_data here...double stack?
                 # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
                 # print("NT: " + str(Q.NextTask().task))
                 # print("LT: " + str(LeadingTask.task))
                 # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-                n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty)
+                n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty,"LOF:FAIL")
                 n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
                 n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
                 currentNode.Adopt(n_P)
@@ -1542,7 +1544,7 @@ class PredictiveTree(object):
 
 
             t:Task = Q.PopTask()
-            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker,1.0)
+            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker,1.0,"HOLD")
             for n_held in nodesHeld:
                 #n.PenaltyTracker.AddTask(n_held.uniqueID)
                 n.DecisionStack.append("HOLD")
