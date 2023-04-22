@@ -704,7 +704,8 @@ class TaskPenaltyTracker(object):
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
         if(self.taskStatus[index]=="NOT-HALTED"):
-            self.ShortestTransmission[index] = self.BackstepCost(wph,Q) + self.taskDelay[index]
+            bs_cost = self.BackstepCost(wph,Q)
+            self.ShortestTransmission[index] = bs_cost + self.taskDelay[index]
             self.taskStatus[index]="HANGING"
         else:
             x=0
@@ -769,7 +770,7 @@ class TaskPenaltyTracker(object):
         start:Position = startingPosition
         end:Position = startingPosition
         total = 0
-        backSteps.reverse()
+        # backSteps.reverse()
         connectionReached = False
         for waypoint in backSteps:
 
@@ -777,6 +778,7 @@ class TaskPenaltyTracker(object):
             if(waypoint[1]):
                 #print("Appending Next Task!")
                 total = total + self.DelayEstimator(start,end,"SEND_DATA")
+                total = total + self.DelayEstimator(start,end,"FLIGHT")
                 connectionReached = True
                 break
             else:
