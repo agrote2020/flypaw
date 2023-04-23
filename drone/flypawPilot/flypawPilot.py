@@ -1079,7 +1079,7 @@ class FlyPawPilot(StateMachine):
             
             speculation =  SpeculativeProduct()
             pt = TaskPenaltyTracker(self.taskQ,self.WatchDog,self.WaypointHistory)
-            root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0)
+            root:Node =  Node(0,self.taskQ,t,0,0,self.WaypointHistory,self.TaskIDGen,emptyList,pt,1.0,"ROOT")
             tree:PredictiveTree = PredictiveTree(root)
             tree.HaltPoint(False)
             #tree.PrintNodes()
