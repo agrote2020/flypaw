@@ -1511,6 +1511,7 @@ class PredictiveTree(object):
                 currentNode.Adopt(n_F)
                 currentNode = n
                 if(probabilty>0.01):
+                    n_P.LeapOfFaithMiracle()
                     self.Continue(n_P) #these should be the same except for probabilty
                     self.HaltPoint(n_F)#these should be the same
                 break
