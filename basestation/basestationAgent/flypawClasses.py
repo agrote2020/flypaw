@@ -1397,7 +1397,7 @@ class PredictiveTree(object):
  
             if(waypoint[1]):
                 #print("Appending Next Task!")
-                nextTask.ChangePosition(waypoint[0])
+                # nextTask.ChangePosition(waypoint[0])
                 taskConversion.append(nextTask)
             t = Task(waypoint[0],"FLIGHT",0,0,node.ID_GEN.Get())
             t.dynamicTask = True
@@ -1482,6 +1482,7 @@ class PredictiveTree(object):
                 n.PenaltyTracker.Penalize(t,previousPosition)
                 currentNode.Adopt(n)
                 currentNode = n
+
                 # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
                 #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
