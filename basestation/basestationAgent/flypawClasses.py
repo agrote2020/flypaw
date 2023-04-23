@@ -712,6 +712,14 @@ class TaskPenaltyTracker(object):
             x=0
 
     
+    def Miracle(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
+        index = self.FindTaskByID(TaskID)
+        if(self.taskStatus[index]=="NOT-HALTED"):
+            bs_cost = self.BackstepCost(wph,Q)
+            self.ShortestTransmission[index] = bs_cost + self.taskDelay[index]
+
+        else:
+            x=0
       
 
     def Penalize(self,leadingAction:Task, previousLocation:Position):
@@ -720,11 +728,13 @@ class TaskPenaltyTracker(object):
             if((self.taskStatus[i]=="HANGING")or(self.taskStatus[i]=="NOT-HALTED")):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
             if(leadingAction.uniqueID==self.taskID[i]):
-
-                self.taskStatus[i] = "COMPLETE"
                 if(self.taskStatus[i] == "NOT-HALTED"):
                     x=0
-                    self.ShortestTransmission[i] =  self.taskDelay[i]
+                    # self.ShortestTransmission[i] =  self.taskDelay[i]
+                self.taskStatus[i] = "COMPLETE"
+
+
+            
 
     def Print(self):
         #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
@@ -1017,10 +1027,10 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         x=0
         nextTask:Task = self.Q.NextTask()
         self.PenaltyTracker.HaltTask(nextTask.uniqueID,self.TravelHistory,self.Q)
-    def PenaltyComplete(self):
+    def LeapOfFaithMiracle(self):
         x=0
         nextTask:Task = self.Q.NextTask()
-        self.PenaltyTracker.Penalize(nextTask)
+        self.PenaltyTracker.Miracle(nextTask.uniqueID,self.TravelHistory,self.Q)
 
 
 
