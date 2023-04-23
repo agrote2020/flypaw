@@ -437,8 +437,8 @@ class SpeculativeProduct(object):
             if(priority == "CONFIDENCE"):
                 if(sol.Confidence>bestSolution.Confidence):
                     bestSolution = sol
-            if(priority == "TOTAL_DELAY"):
-                if(sol.Penalty.TotalDelay()<bestSolution.Penalty.TotalDelay()):
+            if(priority == "PENALTY"):
+                if(sol.Penalty.TotalPenalty()<bestSolution.Penalty.TotalPenalty()):
                     bestSolution = sol
         print("Based on "+ priority + " option #" + str(bestSolution.OptionNumber) + " is the optimal solution")#need a space here U.U
         self.ElectedSolution = bestSolution.OptionNumber
@@ -1145,7 +1145,7 @@ class PredictiveTree(object):
         self.BranchNodes = list()
         memo = dict()
         self.UnmodifiedTaskQ = self.Root.Q.__deepcopy__(memo)
-        self.Priority = "DISTANCE"
+        self.Priority = "PENALTY"
         self.Solutions = list()
         self.CurrentWatchdog:WatchDog  = None
         
