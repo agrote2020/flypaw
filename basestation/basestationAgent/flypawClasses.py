@@ -784,7 +784,7 @@ class TaskPenaltyTracker(object):
                 break
             else:
                 total = total + self.DelayEstimator(start,end,"FLIGHT")
-            startingPosition = end
+            start = end
 
         return total
     
