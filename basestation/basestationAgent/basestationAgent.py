@@ -9,7 +9,7 @@ import sys
 import pytz
 import requests
 import time
-from mobius.controller.controller import Controller
+#from mobius.controller.controller import Controller
 from geographiclib.geodesic import Geodesic
 
 from flypawClasses import iperfInfo, sendVideoInfo, sendFrameInfo, collectVideoInfo, flightInfo, missionInfo, resourceInfo, VehicleCommands, droneSim, MissionObjective, Position
