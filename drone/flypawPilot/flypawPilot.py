@@ -126,7 +126,7 @@ class FlyPawPilot(StateMachine):
         logState(self.logfiles['state'], "preflight")
         
         #certain failures cause preflight to restart so let's sleep for seconds upon entry
-        time.sleep(1)
+        #time.sleep(1)
         
         self.missionstate = "preflight"
         self.Drone = drone
@@ -298,7 +298,7 @@ class FlyPawPilot(StateMachine):
         #something here is not behaving as expected
         if not drone.armed:
             print("drone not armed. Arming")
-            time.sleep(5)
+            #time.sleep(5)
             await drone.set_armed(True)
             print("arming complete")
         else:
