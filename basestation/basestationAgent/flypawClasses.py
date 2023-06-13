@@ -676,6 +676,7 @@ class TaskPenaltyTracker(object):
         self.taskStatus = list()    
         self.taskDelay = list()
         self.ShortestTransmission = list()
+        self.AoI = list()
         self.Penalties = list()
         memo = dict()
 
@@ -700,6 +701,7 @@ class TaskPenaltyTracker(object):
             self.taskDelay.append(delay)
             self.ShortestTransmission.append(delay) 
             self.Penalties.append(-1)
+            self.AoI.append(0)
 
     def HaltTask(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
         index = self.FindTaskByID(TaskID)
@@ -718,6 +720,7 @@ class TaskPenaltyTracker(object):
         for i, t in enumerate(self.taskID):
             if((self.taskStatus[i]=="HANGING")or(self.taskStatus[i]=="NOT-HALTED")):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
+                self.AoI[i] = self.AoI[i] + ActionTimeEstimate
             if(leadingAction.uniqueID==self.taskID[i]):
 
                 self.taskStatus[i] = "COMPLETE"
