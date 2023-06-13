@@ -398,6 +398,7 @@ class ActionRecord(object):
         self.Penalty = penalty
         self.Decision = decision
         self.Confidence = confidence
+        self.Caller = ""
 
 class Solution(object):
     def __init__(self):
@@ -436,8 +437,8 @@ class SpeculativeProduct(object):
             if(priority == "CONFIDENCE"):
                 if(sol.Confidence>bestSolution.Confidence):
                     bestSolution = sol
-            if(priority == "TOTAL_DELAY"):
-                if(sol.Penalty.TotalDelay()<bestSolution.Penalty.TotalDelay()):
+            if(priority == "PENALTY"):
+                if(sol.Penalty.TotalPenalty()<bestSolution.Penalty.TotalPenalty()):
                     bestSolution = sol
         print("Based on "+ priority + " option #" + str(bestSolution.OptionNumber) + " is the optimal solution")#need a space here U.U
         self.ElectedSolution = bestSolution.OptionNumber
@@ -713,6 +714,14 @@ class TaskPenaltyTracker(object):
             x=0
 
     
+    def Miracle(self, TaskID, wph:WaypointHistory, Q:TaskQueue):
+        index = self.FindTaskByID(TaskID)
+        if(self.taskStatus[index]=="NOT-HALTED"):
+            bs_cost = self.BackstepCost(wph,Q)
+            self.ShortestTransmission[index] = bs_cost + self.taskDelay[index]
+
+        else:
+            x=0
       
 
     def Penalize(self,leadingAction:Task, previousLocation:Position):
@@ -722,11 +731,13 @@ class TaskPenaltyTracker(object):
                 self.taskDelay[i] = self.taskDelay[i] + ActionTimeEstimate
                 self.AoI[i] = self.AoI[i] + ActionTimeEstimate
             if(leadingAction.uniqueID==self.taskID[i]):
-
-                self.taskStatus[i] = "COMPLETE"
                 if(self.taskStatus[i] == "NOT-HALTED"):
                     x=0
-                    self.ShortestTransmission[i] =  self.taskDelay[i]
+                    # self.ShortestTransmission[i] =  self.taskDelay[i]
+                self.taskStatus[i] = "COMPLETE"
+
+
+            
 
     def Print(self):
         #print("Number Penalized of Tasks: " + str(self.taskID.__len__()))
@@ -786,7 +797,7 @@ class TaskPenaltyTracker(object):
                 break
             else:
                 total = total + self.DelayEstimator(start,end,"FLIGHT")
-            startingPosition = end
+            start = end
 
         return total
     
@@ -1019,10 +1030,10 @@ class Node(object):#Interdependent PredictiveTree Class, can exist without one, 
         x=0
         nextTask:Task = self.Q.NextTask()
         self.PenaltyTracker.HaltTask(nextTask.uniqueID,self.TravelHistory,self.Q)
-    def PenaltyComplete(self):
+    def LeapOfFaithMiracle(self):
         x=0
         nextTask:Task = self.Q.NextTask()
-        self.PenaltyTracker.Penalize(nextTask)
+        self.PenaltyTracker.Miracle(nextTask.uniqueID,self.TravelHistory,self.Q)
 
 
 
@@ -1137,7 +1148,7 @@ class PredictiveTree(object):
         self.BranchNodes = list()
         memo = dict()
         self.UnmodifiedTaskQ = self.Root.Q.__deepcopy__(memo)
-        self.Priority = "DISTANCE"
+        self.Priority = "PENALTY"
         self.Solutions = list()
         self.CurrentWatchdog:WatchDog  = None
         
@@ -1300,6 +1311,7 @@ class PredictiveTree(object):
                     d = n.DecisionStack 
                     p = n.PenaltyTracker
                     action_temp  = ActionRecord(tte,n.LeadingTask.task,pos,p,d,n.Confidence)
+                    action_temp.Caller = n.CallingOrigin
                     actions.append(action_temp)
 
         return actions
@@ -1398,7 +1410,7 @@ class PredictiveTree(object):
  
             if(waypoint[1]):
                 #print("Appending Next Task!")
-                nextTask.ChangePosition(waypoint[0])
+                # nextTask.ChangePosition(waypoint[0])
                 taskConversion.append(nextTask)
             t = Task(waypoint[0],"FLIGHT",0,0,node.ID_GEN.Get())
             t.dynamicTask = True
@@ -1483,6 +1495,7 @@ class PredictiveTree(object):
                 n.PenaltyTracker.Penalize(t,previousPosition)
                 currentNode.Adopt(n)
                 currentNode = n
+
                 # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
                 #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
@@ -1501,6 +1514,7 @@ class PredictiveTree(object):
                 currentNode.Adopt(n_F)
                 currentNode = n
                 if(probabilty>0.01):
+                    n_P.LeapOfFaithMiracle()
                     self.Continue(n_P) #these should be the same except for probabilty
                     self.HaltPoint(n_F)#these should be the same
                 break
