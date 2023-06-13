@@ -1,6 +1,6 @@
 from argparse import Action
 from ast import Str
-from asyncio import tasks
+import asyncio
 from calendar import c
 from dis import dis
 from turtle import back, position
@@ -160,18 +160,6 @@ class FlyPawPilot(StateMachine):
         """
         self.currentHeading = drone.heading
 
-        """ 
-        Home Check
-        TBD--> compare it to your current location I suppose and guess if it's possible
-        """
-        self.currentHome = drone.home_coords
-        if self.currentHome is None:
-            print("Please ensure home position is set properly")
-            with open(self.logfiles['error'], "a") as ofile:
-                ofile.write("Please ensure home position is set properly")
-                ofile.close()
-            return "preflight"
-
 
         """ 
         Network Check
@@ -180,10 +168,13 @@ class FlyPawPilot(StateMachine):
         self.currentIperfObj = None
 
 
+
         """
         Mission Check
         TBD--> develop high level mission overview checks
         """
+        print("Checking position")
+        checkPosition(self.currentPosition)
         self.missions = getMissions(self.currentPosition,self.basestationIP) #should probably include the position and battery and home info when asking for missions... may preclude some missions   
         #print("missionObjective Transfer Check: "+ str(self.missions.missionObjectives))  
         if len(self.missions)<1:
@@ -202,17 +193,6 @@ class FlyPawPilot(StateMachine):
             
 
                     
-        """
-        Home Check
-        """
-        self.currentHome = drone.home_coords
-        if self.currentHome is None:
-            print("Please ensure home position is set properly")
-            with open(self.logfiles['error'], "a") as ofile:
-                ofile.write("Please ensure home position is set properly")
-                ofile.close()
-            return "preflight"
-        
         """
         Airspace Check
         TBD--> A placeholder for future important concepts like weather checks and UVRs.  Traffic also checked with DCB later
@@ -323,6 +303,19 @@ class FlyPawPilot(StateMachine):
             print("arming complete")
         else:
             print("drone is already armed")
+        """
+        Home Check
+        """
+        #seems like home is not set until after arming so check here
+        #self.currentHome = drone.home_coords()
+        self.currentHome = drone.position
+        if self.currentHome is None:
+            print("Please ensure home position is set properly")
+            with open(self.logfiles['error'], "a") as ofile:
+                ofile.write("Please ensure home position is set properly")
+                ofile.close()
+            drone.set_armed(False)
+            return "preflight"
 
         #ok... let's go!
         return "takeoff"
@@ -345,7 +338,11 @@ class FlyPawPilot(StateMachine):
             target_alt = 30
 
         print("takeoff to " + str(target_alt) + "m")
-        await drone.takeoff(target_alt)
+        #await drone.takeoff(target_alt)
+        try:
+            await asyncio.wait_for(drone.takeoff(target_alt), timeout=20.0) 
+        except asyncio.TimeoutError as ex:
+            print(ex)
         print("reached " + str(target_alt) + "m")
         self.WaypointHistory.AddPoint(getCurrentPosition(drone),1)#pushes first point to WayPointHistory
         
@@ -1406,7 +1403,7 @@ def getMissions(pos, basestationIP):
     msg['uuid'] = str(x)
     msg['type'] = "mission"
     msg['CUR_POS'] = pos
-    serverReply = udpClientMsg(msg, basestationIP, 20001, 2)
+    serverReply = udpClientMsg(msg, basestationIP, 20001, 10)
     if serverReply is not None:
         print(serverReply['uuid_received'])
         if serverReply['uuid_received'] == str(x):
@@ -1572,12 +1569,17 @@ def checkPosition(thisPosition):
     #    return 0
     
     #value check
+    print("lat: " + str(thisPosition.lat))
+    print("lon: " + str(thisPosition.lon))
+    print("alt: " + str(thisPosition.alt)) 
     if thisPosition.lat >= -90 and thisPosition.lat <= 90:
         if thisPosition.lon > -360 and thisPosition.lon < 360:
-            if thisPosition.alt >= 0:
-                #if thisPosition.time... 
-                #or don't
-                return 1
+            #alt was reporting <0, so this was failing... disabling for now
+            #if thisPosition.alt >= 0:
+            #could also consider checking the time
+            #if thisPosition.time...
+            #for now if lat and lon are good let's go
+            return 1
     #value check fail
     print ("incorrect latitude or longitude values")
     return 0
