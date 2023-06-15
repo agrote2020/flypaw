@@ -1499,21 +1499,21 @@ class PredictiveTree(object):
                 # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
                 #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
-                probabilty = self.ConnectionProbabilty(Q.Peek().position)
-                finish = Q.Empty()
-                n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty,"LOF:PASS")
-                #tHIS appear to reveal some issue...both shouldn't have been send_data here...double stack?
-                # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-                # print("NT: " + str(Q.NextTask().task))
-                # print("LT: " + str(LeadingTask.task))
-                # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-                n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty,"LOF:FAIL")
-                n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
-                n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
-                currentNode.Adopt(n_P)
-                currentNode.Adopt(n_F)
-                currentNode = n
-                if(probabilty>0.01):
+                if(probabilty>0.3):
+                    probabilty = self.ConnectionProbabilty(Q.Peek().position)
+                    finish = Q.Empty()
+                    n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty,"LOF:PASS")
+                    #tHIS appear to reveal some issue...both shouldn't have been send_data here...double stack?
+                    # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                    # print("NT: " + str(Q.NextTask().task))
+                    # print("LT: " + str(LeadingTask.task))
+                    # print("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                    n_F = self.NewNode(Q,LeadingTask,finish,False,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,1.0-probabilty,"LOF:FAIL")
+                    n_P.DecisionStack.append("LOF")#Leap of faith! P/F# Lets see how it looks without this...may be create another list of meta-decsions made or something
+                    n_F.DecisionStack.append("LOF")#Leap of faith! P/F # Lets see how it looks without this...its really not useful for decision making
+                    currentNode.Adopt(n_P)
+                    currentNode.Adopt(n_F)
+                    currentNode = n
                     n_P.LeapOfFaithMiracle()
                     self.Continue(n_P) #these should be the same except for probabilty
                     self.HaltPoint(n_F)#these should be the same
