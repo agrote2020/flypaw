@@ -469,7 +469,7 @@ class FlyPawBasestationAgent(object):
     def basestationDispatch(self):
         UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         UDPServerSocket.bind((self.ipaddr, self.port))
-        print("UDP server up and listening")
+        print("UDP server up and listening, IP:" + str(self.ipaddr) + " port: " + str(self.port))
 
         while(True):
             msgFromServer = {}
