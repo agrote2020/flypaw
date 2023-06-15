@@ -308,7 +308,7 @@ class FlyPawBasestationAgent(object):
         mission.missionType = "fire" #"bandwidth", "videography", "fire"
         mission.missionLeader = "basestation" #drone or basestation or cloud
         mission.priority = 1
-        mission.planfile = "./plans/missionComplex3_TaskQ.plan"
+        mission.planfile = "./plans/basePlan_TaskQ.plan"
         mission.default_waypoints = []
         plan = getPlanFromPlanfile(mission.planfile)
         processedPlan = processPlan(plan)
@@ -469,7 +469,7 @@ class FlyPawBasestationAgent(object):
     def basestationDispatch(self):
         UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         UDPServerSocket.bind((self.ipaddr, self.port))
-        print("UDP server up and listening")
+        print("UDP server up and listening, IP:" + str(self.ipaddr) + " port: " + str(self.port))
 
         while(True):
             msgFromServer = {}
