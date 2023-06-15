@@ -1694,7 +1694,7 @@ def udpClientMsg(msg, address, port, timeout_in_seconds):
 
         serialMsg = pickle.dumps(msg)
         serverLoc = (address, port)
-        chunkSize = 4096
+        chunkSize = 8192
         UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         UDPClientSocket.sendto(serialMsg, serverLoc)
         UDPClientSocket.setblocking(0)
