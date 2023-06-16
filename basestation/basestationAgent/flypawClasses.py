@@ -1499,7 +1499,7 @@ class PredictiveTree(object):
                 # if(t.task=="FLIGHT"):#def ActionSimulator(self) to be called here instead
                 #     currentNode.TravelHistory.AddPoint(currentPosition,self.Status.Connected)
             else:
-                if(probabilty>0.6):
+                if(probabilty>0.9):
                     probabilty = self.ConnectionProbabilty(Q.Peek().position)
                     finish = Q.Empty()
                     n_P = self.NewNode(Q,LeadingTask,finish,True,currentNode.TravelHistory,currentNode.ID_GEN,currentNode.DecisionStack,currentNode.PenaltyTracker,probabilty,"LOF:PASS")
