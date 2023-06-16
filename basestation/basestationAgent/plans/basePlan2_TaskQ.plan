@@ -90,7 +90,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": 50,
@@ -105,12 +105,12 @@
                     0,
                     0,
                     null,
-                    35.72591746866346,
-                    -78.69659397996362,
+                    35.72600739811708,
+                    -78.69656628615162,
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -125,12 +125,12 @@
                     0,
                     0,
                     null,
-                    35.7256596305656,
-                    -78.69672138961052,
+                    35.72581700755223,
+                    -78.69676293031853,
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -145,12 +145,12 @@
                     0,
                     0,
                     null,
-                    35.72553810471041,
-                    -78.69714515957936,
+                    35.72559056382592,
+                    -78.69696514981133,
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -165,8 +165,8 @@
                     0,
                     0,
                     null,
-                    35.725751231831,
-                    -78.69750613803696,
+                    35.72581493199919,
+                    -78.6974507504183,
                     50
                 ],
                 "type": "SimpleItem",
@@ -185,8 +185,8 @@
                     0,
                     0,
                     null,
-                    35.72596435787351,
-                    -78.69786711842609,
+                    35.72603180493353,
+                    -78.69778865262876,
                     50
                 ],
                 "type": "SimpleItem",
@@ -205,8 +205,8 @@
                     0,
                     0,
                     null,
-                    35.726211598427085,
-                    -78.69812633046399,
+                    35.72629028640595,
+                    -78.69809402101332,
                     50
                 ],
                 "type": "SimpleItem",
@@ -250,7 +250,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -270,7 +270,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": null,
