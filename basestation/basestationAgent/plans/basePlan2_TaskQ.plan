@@ -90,7 +90,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": 50,
@@ -110,7 +110,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -130,7 +130,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -150,7 +150,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -165,8 +165,8 @@
                     0,
                     0,
                     null,
-                    35.72581493199919,
-                    -78.6974507504183,
+                    35.7253990064281,
+                    -78.69746921295301,
                     50
                 ],
                 "type": "SimpleItem",
@@ -185,8 +185,8 @@
                     0,
                     0,
                     null,
-                    35.72603180493353,
-                    -78.69778865262876,
+                    35.72527864286259,
+                    -78.69807482202613,
                     50
                 ],
                 "type": "SimpleItem",
@@ -205,8 +205,8 @@
                     0,
                     0,
                     null,
-                    35.72629028640595,
-                    -78.69809402101332,
+                    35.72537974923924,
+                    -78.69882329140273,
                     50
                 ],
                 "type": "SimpleItem",
@@ -225,12 +225,52 @@
                     0,
                     0,
                     null,
-                    35.72652616132468,
-                    -78.69836394175141,
+                    35.72619642163561,
+                    -78.69918552481823,
                     50
                 ],
                 "type": "SimpleItem",
                 "TASK": "IMAGE_LOCATION_QUICK"
+            },
+            {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 12,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.72634798936917,
+                    -78.69896323666917,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 13,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.72652869074246,
+                    -78.69851745867193,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": 50,
@@ -238,7 +278,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 12,
+                "doJumpId": 14,
                 "frame": 3,
                 "params": [
                     0,
@@ -258,7 +298,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 13,
+                "doJumpId": 15,
                 "frame": 3,
                 "params": [
                     0,
@@ -270,7 +310,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": null,
@@ -278,7 +318,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 14,
+                "doJumpId": 16,
                 "frame": 3,
                 "params": [
                     0,
@@ -298,7 +338,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 15,
+                "doJumpId": 17,
                 "frame": 3,
                 "params": [
                     0,
@@ -310,7 +350,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
                 "AMSLAltAboveTerrain": 50,
@@ -318,7 +358,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 16,
+                "doJumpId": 18,
                 "frame": 3,
                 "params": [
                     0,
@@ -335,7 +375,7 @@
             {
                 "autoContinue": true,
                 "command": 20,
-                "doJumpId": 17,
+                "doJumpId": 19,
                 "frame": 2,
                 "params": [
                     0,
