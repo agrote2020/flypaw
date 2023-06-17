@@ -110,7 +110,7 @@
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IMAGE_LOCATION_QUICK"
+                "TASK": "IPERF"
             },
             {
                 "AMSLAltAboveTerrain": null,
