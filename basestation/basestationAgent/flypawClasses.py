@@ -1478,7 +1478,7 @@ class PredictiveTree(object):
 
 
             #this ~if~ block seems redundant?
-            if(self.ActionableTask(Q.Peek(),self.Status.Connected)):#Can we changes this to 100% Certainity only? THIS BLOCK ASSUMES task `t` has ~100%
+            if(self.ActionableTask(Q.Peek(),self.Status.Connected)):
                 t:Task = Q.PopTask()
                 previousPosition = currentPosition
                 currentPosition = t.position
@@ -1561,7 +1561,8 @@ class PredictiveTree(object):
 
 
             t:Task = Q.PopTask()
-            n = self.NewNode(Q,t,False,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker,1.0,"HOLD")
+            finish = Q.Empty()#UNSTABLE
+            n = self.NewNode(Q,t,finish,False,HaltNode.TravelHistory,HaltNode.ID_GEN,HaltNode.DecisionStack,HaltNode.PenaltyTracker,1.0,"HOLD")
             for n_held in nodesHeld:
                 #n.PenaltyTracker.AddTask(n_held.uniqueID)
                 n.DecisionStack.append("HOLD")
