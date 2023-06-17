@@ -85,15 +85,15 @@
                     0,
                     0,
                     null,
-                    35.7258115186861,
-                    -78.69686572430082,
+                    35.72576173238052,
+                    -78.69663723818063,
                     50
                 ],
                 "type": "SimpleItem",
                 "TASK": "IPERF"
             },
             {
-                "AMSLAltAboveTerrain": 50,
+                "AMSLAltAboveTerrain": null,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -105,8 +105,8 @@
                     0,
                     0,
                     null,
-                    35.72591109000151,
-                    -78.69732269739804,
+                    35.7258115186861,
+                    -78.69686572430082,
                     50
                 ],
                 "type": "SimpleItem",
@@ -125,8 +125,8 @@
                     0,
                     0,
                     null,
-                    35.726168239626865,
-                    -78.69764516266326,
+                    35.725861304559764,
+                    -78.69709421070664,
                     50
                 ],
                 "type": "SimpleItem",
@@ -139,6 +139,86 @@
                 "autoContinue": true,
                 "command": 16,
                 "doJumpId": 7,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.72591109000151,
+                    -78.69732269739804,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IMAGE_LOCATION_QUICK"
+            },
+            {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 8,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.72603966492172,
+                    -78.6974839297704,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 9,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.726168239626865,
+                    -78.69764516266326,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 10,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.72629681411694,
+                    -78.6978063960766,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
+                "AMSLAltAboveTerrain": 50,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 11,
                 "frame": 3,
                 "params": [
                     0,
@@ -158,7 +238,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 8,
+                "doJumpId": 12,
                 "frame": 3,
                 "params": [
                     0,
@@ -175,7 +255,7 @@
             {
                 "autoContinue": true,
                 "command": 20,
-                "doJumpId": 9,
+                "doJumpId": 13,
                 "frame": 2,
                 "params": [
                     0,
