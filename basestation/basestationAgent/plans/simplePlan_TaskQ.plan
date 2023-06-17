@@ -13,7 +13,7 @@
         "hoverSpeed": 5,
         "items": [
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -33,7 +33,7 @@
                 "TASK": "IPERF"
             },
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -45,15 +45,15 @@
                     0,
                     0,
                     null,
-                    35.72666435,
-                    -78.69657225,
+                    35.72662644583416,
+                    -78.69621428708953,
                     50
                 ],
                 "type": "SimpleItem",
                 "TASK": "IPERF"
             },
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -65,15 +65,15 @@
                     0,
                     0,
                     null,
-                    35.7258077,
-                    -78.69667414,
+                    35.72571194564303,
+                    -78.696408752346,
                     50
                 ],
                 "type": "SimpleItem",
                 "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -85,15 +85,15 @@
                     0,
                     0,
                     null,
-                    35.72591109,
-                    -78.69748193,
+                    35.72591109000151,
+                    -78.69732269739804,
                     50
                 ],
                 "type": "SimpleItem",
-                "TASK": "IPERF"
+                "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -105,15 +105,15 @@
                     0,
                     0,
                     null,
-                    35.72640145,
-                    -78.69794404,
+                    35.72642538839194,
+                    -78.69796763001042,
                     50
                 ],
                 "type": "SimpleItem",
                 "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
-                "AMSLAltAboveTerrain": null,
+                "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
@@ -151,9 +151,9 @@
             }
         ],
         "plannedHomePosition": [
-            35.72719447,
-            -78.6965682,
-            110.83559938786117
+            35.72733029221068,
+            -78.69617521897719,
+            111.76921168212607
         ],
         "vehicleType": 2,
         "version": 2
