@@ -73,12 +73,32 @@
                 "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
-                "AMSLAltAboveTerrain": 50,
+                "AMSLAltAboveTerrain": null,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
                 "doJumpId": 4,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.7258115186861,
+                    -78.69686572430082,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
+                "AMSLAltAboveTerrain": 50,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 5,
                 "frame": 3,
                 "params": [
                     0,
@@ -93,12 +113,32 @@
                 "TASK": "IMAGE_LOCATION_QUICK"
             },
             {
+                "AMSLAltAboveTerrain": null,
+                "Altitude": 50,
+                "AltitudeMode": 1,
+                "autoContinue": true,
+                "command": 16,
+                "doJumpId": 6,
+                "frame": 3,
+                "params": [
+                    0,
+                    0,
+                    0,
+                    null,
+                    35.726168239626865,
+                    -78.69764516266326,
+                    50
+                ],
+                "type": "SimpleItem",
+                "TASK": "IPERF"
+            },
+            {
                 "AMSLAltAboveTerrain": 50,
                 "Altitude": 50,
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 5,
+                "doJumpId": 7,
                 "frame": 3,
                 "params": [
                     0,
@@ -118,7 +158,7 @@
                 "AltitudeMode": 1,
                 "autoContinue": true,
                 "command": 16,
-                "doJumpId": 6,
+                "doJumpId": 8,
                 "frame": 3,
                 "params": [
                     0,
@@ -135,7 +175,7 @@
             {
                 "autoContinue": true,
                 "command": 20,
-                "doJumpId": 7,
+                "doJumpId": 9,
                 "frame": 2,
                 "params": [
                     0,
